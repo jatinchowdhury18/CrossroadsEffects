@@ -2,3 +2,7 @@
 faust2w64vst
 
 *.dll
+
+.vscode
+__pycache__
+*.svg

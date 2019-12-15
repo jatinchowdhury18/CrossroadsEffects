@@ -13,25 +13,23 @@ def compile_plugin(plugin):
     p.wait()
     os.system('rm -rf faust.*')
 
-    os.system('rm -rf faust_plugins' + plugin)
-    # os.system('mkdir faust_plugins/' + plugin)
+    os.system('rm -rf faust_plugins/' + plugin)
+    os.mkdir('faust_plugins/' + plugin)
 
     os.system('mv faust_scripts/' + plugin + '-svg faust_plugins/' + plugin + '/svgs')  
     mv_cmd = 'mv ' + orig_plugin_file + ' ' + cp_plugin_file
     os.system(mv_cmd)
 
-compile_plugin('test')
+# compile_plugin('test')
 
 #%%
-def test_plugin(plugin):
+def test_plugin(plugin, in_wav, out_wav):
     plugin_file = 'faust_plugins/' + plugin + '/' + plugin + '.dll'
-    input_wav = 'drums.wav'
-    out_wav = 'drums_out.wav'
 
     runner = 'd:/Documents/CCRMA/Research/AutoEffects/modules/PluginRunner/PluginRunner.exe'
 
-    p = subprocess.Popen([runner, plugin_file, input_wav, out_wav], shell=True)
+    p = subprocess.Popen([runner, plugin_file, in_wav, out_wav], shell=True)
     p.wait()
 
-test_plugin('test')
+# test_plugin('test', 'drums.wav', 'drums_out.wav')
 
