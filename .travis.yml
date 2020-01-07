@@ -18,7 +18,7 @@ jobs:
       language: shell
       before_install:
         - choco install python --version 3.6.0
-        - python -n pip install --upgrade pip
+        - python -m pip install --upgrade pip
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
 
 install:
