@@ -1,6 +1,7 @@
 #%%
 import os
 import subprocess
+from sys import platform
 
 #%%
 def compile_plugin(plugin):
@@ -8,7 +9,15 @@ def compile_plugin(plugin):
     orig_plugin_file = 'faust_scripts/' + plugin + '.dll'
     cp_plugin_file = 'faust_plugins/' + plugin + '/' + plugin + '.dll'
 
-    p = subprocess.Popen(['faust2w64vst.sh', faust_file],
+    vst_script = 'faust2faustvst'
+    if platform == "linux" or platform == "linux2": # linux
+        vst_script = 'faust2faustvst'
+    elif platform == "darwin": # OSX
+        vst_script = 'faust2faustvst'
+    elif platform == "win32": # Windows
+        vst_script = 'faust2w64vst.sh'
+
+    p = subprocess.Popen([vst_script, faust_file],
                          stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
     p.wait()
     os.system('rm -rf faust.*')
