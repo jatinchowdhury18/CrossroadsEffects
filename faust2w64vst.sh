@@ -11,7 +11,7 @@
 
 #------------------------------------------------------------------------------
 # 1/ VST SDK Should be installed somewhere
-VST=/c/SDKs/VST_SDK/VST2_SDK
+VST=./modules/JUCE/VST2_SDK
 . faustpath
 if [ ! -d "${VST}" ]; then
   	echo "unable to locate VST SDK: VST=${VST}" 1>&2
