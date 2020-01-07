@@ -42,10 +42,7 @@ addons:
 
 install:
   - pip3 install --upgrade pip
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]];
-    then pip3 install -r requirements.txt;
-    else pip install -r requirements.txt;
-    fi
+  - pip3 install -r requirements.txt
   # install Faust
   - cd modules/faust
   - make
