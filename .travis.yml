@@ -21,6 +21,11 @@ jobs:
         - python -m pip install --upgrade pip
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
 
+addons:
+  apt:
+    packages:
+      - cmake
+
 install:
   - pip3 install --upgrade pip
   - pip install -r requirements.txt
