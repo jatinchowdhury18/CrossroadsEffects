@@ -23,11 +23,11 @@ class Model:
             processors.append(e.name)
             file.write(e.get_faust())
 
-        file.write('\nprocess = _ :')
+        process_string = '\nprocess = _,_ :'
         for p in processors:
-            file.write(' ' + p + ' :')
-
-        file.write(' _;\n')
+            process_string += ' ' + p + ',' + p + ' :'
+        process_string += ' _,_;\n'
+        file.write(process_string)
 
         file.close()
 
@@ -49,12 +49,13 @@ class Gain(Element):
         return '{} = _*{};\n'.format(self.name, self.parameters['gain'])
 
 class Delay(Element):
-    def __init__(self):
+    def __init__(self, N=1):
         id = get_uuid()
         self.name = 'delay_' + id
+        self.length = N
 
     def get_faust(self):
-        return '{} = _\';\n'.format(self.name)
+        return '{} = @({});\n'.format(self.name, self.length)
 
 class Split(Element):
     def __init__(self, elements):
