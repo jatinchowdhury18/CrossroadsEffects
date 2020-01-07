@@ -1,0 +1,18 @@
+notifications:
+  email: false
+
+language: python
+
+os:
+  - osx
+  - windows
+  - linux
+
+install:
+  - pip install audio_dspy
+
+script:
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]];
+    then bash run_tests.sh;
+    else sh run_tests.sh;
+    fi
