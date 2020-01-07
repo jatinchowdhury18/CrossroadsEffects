@@ -112,7 +112,7 @@ class Feedback(Element):
     
 
 #%%
-model = Model()
+# model = Model()
 
 # Simple example
 # model.elements.append(Gain(0.5))
@@ -161,16 +161,16 @@ def get_element(arg, split_recursion=0, fb_recursion=0):
 
 def gen_random_model():
     model = Model()
-    num_elements = r.randint(1, 10)
+    num_elements = r.randint(1, 4)
 
     for _ in range(num_elements):
         model.elements.append(get_element(r.randint(0, 3)))
     
     return model
 
-model = gen_random_model()
-model.write_to_file('test_gen.dsp')
+# model = gen_random_model()
+# model.write_to_file('test_gen.dsp')
 
 #%%
-compile_plugin('test_gen')
-test_plugin('test_gen', 'drums.wav', 'drums_out.wav')
+# compile_plugin('test_gen')
+# test_plugin('test_gen', 'drums.wav', 'drums_out.wav')
