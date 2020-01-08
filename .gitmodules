@@ -1,3 +1,9 @@
 [submodule "modules/PluginRunner"]
 	path = modules/PluginRunner
 	url = https://github.com/jatinchowdhury18/PluginRunner.git
+[submodule "Juce"]
+	path = modules/JUCE
+	url = https://github.com/jatinchowdhury18/JUCE.git
+[submodule "modules/faust"]
+	path = modules/faust
+	url = https://github.com/grame-cncm/faust.git

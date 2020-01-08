@@ -1,0 +1,46 @@
+notifications:
+  email: false
+
+language: python
+
+jobs:
+  include:
+    - name: "Linux"
+      python: 3.6
+
+    - name: "Mac"
+      os: osx
+      osx_image: xcode11.2
+      language: shell
+
+stages:
+  - name: services
+    if: os ==  linux
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - webkit2gtk-4.0
+
+services:
+  - xvfb
+
+install:
+  - pip3 install --upgrade pip
+  - pip3 install -r requirements.txt
+  # install Faust
+  - cd modules/faust
+  - make
+  - sudo make install
+  - cd $TRAVIS_BUILD_DIR
+  # VST SDK
+  - sudo cp -R modules/JUCE/VST2_SDK/ /usr/local/include/vstsdk2.4/
+  # boost
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then sudo apt-get install libboost-all-dev; fi
+
+script:
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]];
+    then bash run_tests.sh;
+    else sh run_tests.sh;
+    fi
