@@ -19,21 +19,15 @@ def compile_plugin(plugin):
     cp_plugin_file = 'faust_plugins/' + plugin + '/' + plugin + vst_ext
 
     if platform == "linux" or platform == "linux2" or platform == "darwin":
-        p = subprocess.Popen(['faust2svg', faust_file],
-                             stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
-        p.wait()
+        os.system('faust2svg ' + faust_file)
 
-    vst_script = 'faust2faustvst'
-    if platform == "linux" or platform == "linux2": # linux
-        vst_script = 'faust2faustvst'
-    elif platform == "darwin": # OSX
-        vst_script = 'faust2faustvst'
-    elif platform == "win32": # Windows
-        vst_script = 'faust2w64vst.sh'
-
-    p = subprocess.Popen([vst_script, faust_file],
+    if platform == "win32":
+        p = subprocess.Popen([vst_script, faust_file],
                          stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
-    p.wait()
+        p.wait()
+    else:
+        os.system(vst_script + " " + faust_file)
+
     os.system('rm -rf faust.*')
 
     os.system('rm -rf faust_plugins/' + plugin)
@@ -51,7 +45,7 @@ def test_plugin(plugin, in_wav, out_wav):
         runner = 'PluginRunnerLinux'
         vst_ext = ".so"
     elif platform == "darwin": # OSX
-        runner = '/PluginRunnerMac'
+        runner = 'PluginRunnerMac'
         vst_ext = ".vst"
     elif platform == "win32": # Windows
         runner = 'PluginRunner.exe'
