@@ -57,8 +57,14 @@ install:
   - pip3 install -r requirements.txt
   # install Faust
   - cd modules/faust
-  - make
-  - sudo make install
+  - if [[ $TRAVIS_OS_NAME == 'windows' ]];
+    then $msys2 make;
+    else make;
+    fi
+  - if [[ $TRAVIS_OS_NAME == 'windows' ]];
+    then $msys2 sudo make install;
+    else sudo make install;
+    fi
   - cd $TRAVIS_BUILD_DIR
   # VST SDK
   - sudo cp -R modules/JUCE/VST2_SDK/ /usr/local/include/vstsdk2.4/
