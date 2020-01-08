@@ -53,10 +53,13 @@ def test_plugin(plugin, in_wav, out_wav):
 
     plugin_file = 'faust_plugins/' + plugin + '/' + plugin + vst_ext
 
-    os.system("cp modules/PluginRunner/" + runner + " .")
+    os.system("cp -R modules/PluginRunner/" + runner + " .")
 
-    p = subprocess.Popen([runner, plugin_file, in_wav, out_wav], shell=True)
-    p.wait()
+    if platform == "win32":
+        p = subprocess.Popen([runner, plugin_file, in_wav, out_wav], shell=True)
+        p.wait()
+    else:
+        os.system(runner + " " + plugin_file + " " + in_wav + " " + out_wav)
 
     os.system("rm -rf " + runner)
 
