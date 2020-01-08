@@ -13,32 +13,6 @@ jobs:
       osx_image: xcode11.2
       language: shell
 
-    - name: "Windows"
-      os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.6.0
-        - python -m pip install --upgrade pip
-        - |-
-            case $TRAVIS_OS_NAME in
-              windows)
-                [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-                choco uninstall -y mingw
-                choco upgrade --no-progress -y msys2
-                export msys2='cmd //C RefreshEnv.cmd '
-                export msys2+='& set MSYS=winsymlinks:nativestrict '
-                export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-                export mingw64="$msys2 -mingw64 -full-path -here -c \$\* --"
-                export msys2+=" -msys2 -c \$\* --"
-                $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
-                ## Install more MSYS2 packages from https://packages.msys2.org/base here
-                taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
-                export PATH=/C/tools/msys64/mingw64/bin:$PATH
-                export MAKE=mingw32-make  # so that Autotools can find it
-                ;;
-            esac
-      env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
-
 stages:
   - name: services
     if: os ==  linux
@@ -57,14 +31,8 @@ install:
   - pip3 install -r requirements.txt
   # install Faust
   - cd modules/faust
-  - if [[ $TRAVIS_OS_NAME == 'windows' ]];
-    then $msys2 make;
-    else make;
-    fi
-  - if [[ $TRAVIS_OS_NAME == 'windows' ]];
-    then $msys2 sudo make install;
-    else sudo make install;
-    fi
+  - make
+  - sudo make install
   - cd $TRAVIS_BUILD_DIR
   # VST SDK
   - sudo cp -R modules/JUCE/VST2_SDK/ /usr/local/include/vstsdk2.4/
@@ -76,17 +44,3 @@ script:
     then bash run_tests.sh;
     else sh run_tests.sh;
     fi
-
-before_cache:
-  - |-
-      case $TRAVIS_OS_NAME in
-        windows)
-          # https://unix.stackexchange.com/a/137322/107554
-          $msys2 pacman --sync --clean --noconfirm
-          ;;
-      esac
-
-cache:
-    directories:
-    - $HOME/AppData/Local/Temp/chocolatey
-    - /C/tools/msys64
