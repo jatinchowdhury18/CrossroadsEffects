@@ -39,11 +39,18 @@ jobs:
             esac
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
 
+stages:
+  - name: services
+    if: os ==  linux
+
 addons:
   apt:
     packages:
       - cmake
       - webkit2gtk-4.0
+
+services:
+  - xvfb
 
 install:
   - pip3 install --upgrade pip

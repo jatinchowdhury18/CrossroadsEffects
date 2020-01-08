@@ -42,10 +42,10 @@ def compile_plugin(plugin):
 #%%
 def test_plugin(plugin, in_wav, out_wav):
     if platform == "linux" or platform == "linux2":
-        runner = 'PluginRunnerLinux'
+        runner = 'modules/PluginRunner/PluginRunnerLinux'
         vst_ext = ".so"
     elif platform == "darwin": # OSX
-        runner = 'PluginRunnerMac'
+        runner = 'modules/PluginRunner/PluginRunnerMac'
         vst_ext = ".vst"
     elif platform == "win32": # Windows
         runner = 'PluginRunner.exe'
@@ -53,15 +53,13 @@ def test_plugin(plugin, in_wav, out_wav):
 
     plugin_file = 'faust_plugins/' + plugin + '/' + plugin + vst_ext
 
-    os.system("cp -R modules/PluginRunner/" + runner + " .")
-
     if platform == "win32":
+        os.system("cp -R modules/PluginRunner/" + runner + " .")
         p = subprocess.Popen([runner, plugin_file, in_wav, out_wav], shell=True)
         p.wait()
+        os.system("rm -rf " + runner)
     else:
         os.system(runner + " " + plugin_file + " " + in_wav + " " + out_wav)
-
-    os.system("rm -rf " + runner)
 
 # test_plugin('test', 'drums.wav', 'drums_out.wav')
 
