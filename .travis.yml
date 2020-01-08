@@ -43,6 +43,7 @@ addons:
   apt:
     packages:
       - cmake
+      - webkit2gtk-4.0
 
 install:
   - pip3 install --upgrade pip
