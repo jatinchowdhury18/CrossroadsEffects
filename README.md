@@ -1,5 +1,7 @@
 # Crossroads Effects
 
+[![Build Status](https://travis-ci.com/jatinchowdhury18/CrossroadsEffects.svg?token=Ub9niJrqG1Br1qaaxp7E&branch=master)](https://travis-ci.com/jatinchowdhury18/CrossroadsEffects)
+
 This repository contains a system (still in developement)
 for auto-generating audio effects for a given input and
 output audio file. More technically, the system uses a `Python`
