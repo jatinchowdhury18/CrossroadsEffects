@@ -3,7 +3,7 @@ current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfra
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
 from gen_faust import Model,Element,Gain,Delay,Split,Feedback
-from plugin_utils import compile_plugin, test_plugin
+from plugin_utils import compile_plugin, test_plugin, calc_error
 
 import numpy as np
 from scipy.io import wavfile
@@ -39,5 +39,5 @@ test_plugin('test_DF2', 'drums.wav', 'drums_out.wav')
 fs, y_test = wavfile.read('drums_out.wav')
 y_test = adsp.normalize(y_test)
 
-err = np.abs(y - y_test)
-assert(np.max(err) < 0.05)
+err = calc_error(y, y_test, fs)
+assert(err < 1.0e-4)

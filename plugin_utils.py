@@ -2,6 +2,9 @@
 import os
 import subprocess
 from sys import platform
+import numpy as np
+import scipy.signal as signal
+import matplotlib.pyplot as plt
 
 #%%
 def compile_plugin(plugin):
@@ -63,3 +66,18 @@ def test_plugin(plugin, in_wav, out_wav):
 
 # test_plugin('test', 'drums.wav', 'drums_out.wav')
 
+# %%
+def calc_error(des_wav, out_wav, fs):
+    mean_square_error = np.mean((des_wav - out_wav)**2, axis=None)
+
+    nseg = 2048
+
+    des = (des_wav[:,0] + des_wav[:,1]) / 2
+    out = (out_wav[:,0] + out_wav[:,1]) / 2
+
+    _, _, Z_des = signal.stft(des, fs=fs, nperseg=nseg, nfft=nseg*2)
+    _, _, Z_out = signal.stft(out, fs=fs, nperseg=nseg, nfft=nseg*2)
+
+    freq_err = np.mean(np.abs(Z_des - Z_out), axis=None)
+
+    return mean_square_error + freq_err
