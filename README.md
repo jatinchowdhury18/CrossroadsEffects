@@ -64,7 +64,6 @@ at a crossroads . . .
 
 ## TODO:
 
-- Calculate error
 - Optimize parameters for a given structure
 - Genetic algorithm to evolve structures
 - Simple nonlinear elements

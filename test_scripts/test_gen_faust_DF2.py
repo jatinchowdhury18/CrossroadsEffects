@@ -2,7 +2,7 @@ import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
-from gen_faust import Model,Element,Gain,Delay,Split,Feedback
+from gen_faust import Model,Element,Gain,Delay,Split,Feedback,optimize_model
 from plugin_utils import compile_plugin, test_plugin, calc_error
 
 import numpy as np
@@ -41,3 +41,6 @@ y_test = adsp.normalize(y_test)
 
 err = calc_error(y, y_test, fs)
 assert(err < 1.0e-4)
+
+print('Error: {}'.format(err))
+print('SUCCESS')
