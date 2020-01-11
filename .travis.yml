@@ -3,6 +3,10 @@ notifications:
 
 language: python
 
+# if pull request: always build
+# if push: only build for master branch
+if: (type != push) OR (type = push AND branch = master)
+
 jobs:
   include:
     - name: "Linux"
@@ -22,6 +26,7 @@ addons:
     packages:
       - cmake
       - webkit2gtk-4.0
+      - libboost-all-dev
 
 services:
   - xvfb
@@ -34,13 +39,14 @@ install:
   - make
   - sudo make install
   - cd $TRAVIS_BUILD_DIR
-  # VST SDK
-  - sudo cp -R modules/JUCE/VST2_SDK/ /usr/local/include/vstsdk2.4/
-  # boost
-  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then sudo apt-get install libboost-all-dev; fi
 
 script:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]];
     then bash run_tests.sh;
-    else sh run_tests.sh;
+    else travis_wait 100 sh run_tests.sh;
     fi
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - modules/faust

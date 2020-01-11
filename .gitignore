@@ -1,11 +1,13 @@
 *.wav
 !drums.wav
 faust2w64vst
+faust.*
 
 *.dll
 
 .vscode
 __pycache__
+*.pyc
 *.svg
 
 Refs

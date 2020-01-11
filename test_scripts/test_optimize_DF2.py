@@ -26,8 +26,12 @@ wavfile.write('drums-wet.wav', fs, y)
 
 # Create model
 model = Model()
-model.elements.append(Feedback([Split([[Gain(a[1])], [Delay(), Gain(a[2])]]), Gain(-1.0)]))
-model.elements.append(Split([[Gain(b[0])], [Delay(), Gain(b[1])], [Delay(2), Gain(b[2])]]))
+model.elements.append(Feedback([Split([[Gain(-1.4)], [Delay(), Gain(0.95)]]), Gain(-1.0)]))
+model.elements.append(Split([[Gain(0)], [Delay(), Gain(0.09)], [Delay(), Gain(0)]]))
+
+# unoptimized error: ~0.007
+params = optimize_model(model, 'test_DF2_opt', 'drums.wav', 'drums_out.wav', 'drums-wet.wav', tol=1.0e-4)
+model.set_params(params)
 
 # Write to file and compile
 model.write_to_file('test_DF2.dsp')
@@ -40,7 +44,7 @@ fs, y_test = wavfile.read('drums_out.wav')
 y_test = adsp.normalize(y_test)
 
 err = calc_error(y, y_test, fs)
-assert(err < 1.0e-4)
+assert err < 5.0e-3, "Final error = {}".format(err)
 
 print('Error: {}'.format(err))
 print('SUCCESS')
