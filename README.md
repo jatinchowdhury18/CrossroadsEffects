@@ -25,10 +25,19 @@ installed:
 - `Python` packages (`pip install -r requirements.txt`)
 - [`Faust`](https://github.com/grame-cncm/faust)
 - Mac/Linux only
-  - VST2 SDK (install to `/usr/local/include/vstsdk2.4`)
   - Boost (`sudo apt-get install libboost-all-dev`)
 - Windows only
   - [MSYS2](https://www.msys2.org/)
+
+If you don't already have `Faust` installed, it is included in 
+this repo and can be installed as follows (this requires CMAKE):
+
+```bash
+# Starting from the root directory of this repo
+cd modules/Faust
+make
+sudo make install
+```
 
 ### Running
 ```bash
