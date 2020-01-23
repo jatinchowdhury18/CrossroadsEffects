@@ -1,19 +1,19 @@
 import("stdfaust.lib");
 
-gain_3f894f1e = _*-1.4320450453708604;
-delay_96921c37 = @(1.0);
-gain_54540ac1 = _*0.5594923063264857;
-split_d072f08a = _ <: (gain_3f894f1e), (delay_96921c37 : gain_54540ac1) :> _;
+gain_af1c7fec = _*-1.7990948352036202;
+delay_9ecd612e = @(1);
+gain_cc3de264 = _*0.8175108129889816;
+split_b45e4639 = _ <: (gain_af1c7fec), (delay_9ecd612e : gain_cc3de264) :> _;
 
-gain_eaf05bcf = _*-0.8947764712702115;
-fb_f77c307a = +~(split_d072f08a : gain_eaf05bcf);
+gain_e5220b91 = _*-1.0;
+fb_161536cc = +~(split_b45e4639 : gain_e5220b91);
 
-gain_f01b7d64 = _*0.049408296898725446;
-delay_ec340a6f = @(1.0);
-gain_35431914 = _*-0.09313011490341294;
-delay_7b86b1d4 = @(2.0);
-gain_83fb850e = _*0.07047614013418019;
-split_8bfbe1a0 = _ <: (gain_f01b7d64), (delay_ec340a6f : gain_35431914), (delay_7b86b1d4 : gain_83fb850e) :> _;
+gain_c9a9650d = _*0.00460399444634034;
+delay_4767e91a = @(1);
+gain_d38ca928 = _*0.00920798889268068;
+delay_eef49bca = @(2);
+gain_832ed10f = _*0.00460399444634034;
+split_318a532c = _ <: (gain_c9a9650d), (delay_4767e91a : gain_d38ca928), (delay_eef49bca : gain_832ed10f) :> _;
 
 
-process = _,_ : fb_f77c307a,fb_f77c307a : split_8bfbe1a0,split_8bfbe1a0 : _,_;
+process = _,_ : fb_161536cc,fb_161536cc : split_318a532c,split_318a532c : _,_;

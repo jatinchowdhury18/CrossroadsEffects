@@ -2,7 +2,7 @@ import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
-from gen_faust import Model,Element,Gain,Delay,Split,Feedback,optimize_model
+from gen_faust import Model,Element,Gain,Delay,Split,Feedback,optimize_model,get_error_for_model
 from plugin_utils import compile_plugin, test_plugin, calc_error
 
 import numpy as np
@@ -10,6 +10,7 @@ from scipy.io import wavfile
 import scipy.signal as signal
 import audio_dspy as adsp
 import matplotlib.pyplot as plt
+import time
 
 # read file
 fs, x = wavfile.read('drums.wav')
@@ -44,3 +45,11 @@ assert(err < 1.0e-4)
 
 print('Error: {}'.format(err))
 print('SUCCESS')
+
+get_time = True
+if get_time:
+    tic = time.time()
+    params, _ = model.get_params()
+    # get_error_for_model(params, model, 'test_DF2', 'drums.wav', 'drums_out.wav', 'drums-wet.wav')
+    compile_plugin('test_DF2')
+    print('Took {} seconds to run.'.format(time.time() - tic))
