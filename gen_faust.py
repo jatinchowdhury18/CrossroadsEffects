@@ -1,11 +1,8 @@
 #%%
 from abc import ABC, abstractmethod
-from plugin_utils import compile_plugin, test_plugin, calc_error
+from plugin_utils import compile_plugin, test_plugin
 import uuid
 import random as r
-from scipy.optimize import minimize
-from scipy.io import wavfile
-import audio_dspy as adsp
 import numpy as np
 import matplotlib.pyplot as plt
 r.seed()
@@ -174,30 +171,6 @@ class Feedback(Element):
         for e in self.elements:
             idx = e.set_params(params, idx)
         return idx
-    
-def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-4):
-    params, bounds = model.get_params()
-    result = minimize(get_error_for_model, params, args=(model, name, in_wav, out_wav, des_wav),
-                      bounds=bounds, options={'maxiter': 100, 'gtol': 1.0e-6, 'ftol': 5.0e-9,'eps': 5.0e-6, 'disp': True, 'iprint': 101}, tol=tol)
-
-    print(result.message)
-    return result.x
-
-def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
-    model.set_params(params)
-    model.write_to_file(name + '.dsp')
-    compile_plugin(name)
-
-    test_plugin(name, in_wav, out_wav)
-
-    fs, y = wavfile.read(des_wav)
-    fs, y_test = wavfile.read(out_wav)
-
-    # normalize for wav files
-    y = y / 2**15 if np.max(np.abs(y)) > 10 else y
-    y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
-
-    return calc_error(y, y_test, fs)
 
 
 #%%

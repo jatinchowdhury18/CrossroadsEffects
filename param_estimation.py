@@ -1,5 +1,7 @@
 import numpy as np
-from gen_faust import Model, get_error_for_model
+from scipy.io import wavfile
+from gen_faust import Model
+from plugin_utils import compile_plugin, test_plugin, calc_error
 from tqdm import tqdm
 
 def estimate_params(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
@@ -81,3 +83,19 @@ def mutate_params(parent_params, bounds, gen_num, N_gens):
         new_params[i] = np.clip(np.random.normal(mean, stddev), bounds[i][0], bounds[i][1])
 
     return new_params
+
+def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
+    model.set_params(params)
+    model.write_to_file(name + '.dsp')
+    compile_plugin(name)
+
+    test_plugin(name, in_wav, out_wav)
+
+    fs, y = wavfile.read(des_wav)
+    fs, y_test = wavfile.read(out_wav)
+
+    # normalize for wav files
+    y = y / 2**15 if np.max(np.abs(y)) > 10 else y
+    y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
+
+    return calc_error(y, y_test, fs)
