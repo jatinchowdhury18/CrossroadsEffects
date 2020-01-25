@@ -27,8 +27,8 @@ wavfile.write('drums-wet.wav', fs, y)
 
 # Create model
 model = Model()
-model.elements.append(Feedback([Split([[Gain(a[1])], [Delay(), Gain(a[2])]]), Gain(-1.0)]))
-model.elements.append(Split([[Gain(b[0])], [Delay(), Gain(b[1])], [Delay(2), Gain(b[2])]]))
+model.elements.append(Feedback([Split([[Gain(a[1])], [Delay(1/100), Gain(a[2])]]), Gain(-1.0)]))
+model.elements.append(Split([[Gain(b[0])], [Delay(1/100), Gain(b[1])], [Delay(2/100), Gain(b[2])]]))
 
 # Write to file and compile
 model.write_to_file('test_DF2.dsp')
@@ -46,7 +46,7 @@ assert(err < 1.0e-4)
 print('Error: {}'.format(err))
 print('SUCCESS')
 
-get_time = True
+get_time = False
 if get_time:
     tic = time.time()
     params, _ = model.get_params()

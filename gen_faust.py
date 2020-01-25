@@ -6,6 +6,8 @@ import random as r
 from scipy.optimize import minimize
 from scipy.io import wavfile
 import audio_dspy as adsp
+import numpy as np
+import matplotlib.pyplot as plt
 r.seed()
 
 # %%
@@ -66,7 +68,7 @@ class Element(ABC):
         return idx
 
 class Gain(Element):
-    def __init__(self, value):
+    def __init__(self, value=0):
         id = get_uuid()
         self.name = 'gain_' + id
         self.gain = value
@@ -83,17 +85,17 @@ class Gain(Element):
         return idx + 1
 
 class Delay(Element):
-    def __init__(self, N=1):
+    def __init__(self, length=0):
         id = get_uuid()
         self.name = 'delay_' + id
-        self.length = N
+        self.length = length
 
     def get_faust(self):
-        return '{} = @({});\n'.format(self.name, self.length)
+        return '{} = @({});\n'.format(self.name, int(self.length*100))
 
     def get_params(self, params, bounds):
         params.append(self.length)
-        bounds.append((0, 100))
+        bounds.append((0, 1))
 
     def set_params(self, params, idx):
         self.length = params[idx]
@@ -191,8 +193,9 @@ def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
     fs, y = wavfile.read(des_wav)
     fs, y_test = wavfile.read(out_wav)
 
-    y = adsp.normalize(y)
-    y_test = adsp.normalize(y_test)
+    # normalize for wav files
+    y = y / 2**15 if np.max(np.abs(y)) > 10 else y
+    y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
 
     return calc_error(y, y_test, fs)
 
