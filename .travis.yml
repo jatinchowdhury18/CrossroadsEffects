@@ -43,7 +43,7 @@ install:
 script:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]];
     then bash run_tests.sh;
-    else travis_wait 100 sh run_tests.sh;
+    else sh run_tests.sh;
     fi
 
 cache:
