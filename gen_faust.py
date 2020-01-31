@@ -65,7 +65,7 @@ class Element(ABC):
         return idx
 
 class Gain(Element):
-    def __init__(self, value=0):
+    def __init__(self, value=0.5):
         id = get_uuid()
         self.name = 'gain_' + id
         self.gain = value
@@ -81,8 +81,22 @@ class Gain(Element):
         self.gain = params[idx]
         return idx + 1
 
+class UnitDelay(Element):
+    def __init__(self):
+        id = get_uuid()
+        self.name = 'unit_delay_' + id
+
+    def get_faust(self):
+        return '{} = @(1);\n'.format(self.name)
+
+    def get_params(self, params, bounds):
+        return
+
+    def set_params(self, params, idx):
+        return idx
+
 class Delay(Element):
-    def __init__(self, length=0):
+    def __init__(self, length=2/100):
         id = get_uuid()
         self.name = 'delay_' + id
         self.length = length

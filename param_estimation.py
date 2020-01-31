@@ -4,10 +4,18 @@ from gen_faust import Model
 from plugin_utils import compile_plugin, test_plugin, calc_error
 from tqdm import tqdm
 
+from scipy.optimize import minimize
+
+def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
+    params, bounds = model.get_params()
+    result = minimize(get_error_for_model, params, args=(model,name,in_wav,out_wav,des_wav), tol=tol,
+                      bounds=bounds, options={'maxiter': 30, 'eps': 1e-06, 'ftol':1e-10, 'iprint': 1})
+    return result.x
+
 def estimate_params(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
     """Use Genetic Algorithm to estimate params"""
-    N_pop = 50
-    N_gens = 10
+    N_pop = 100
+    N_gens = 30
     N_survive = 2
 
     params, bounds = model.get_params()

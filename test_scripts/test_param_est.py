@@ -2,8 +2,8 @@ import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
-from gen_faust import Model,Element,Gain,Delay,Split,Feedback
-from param_estimation import estimate_params,get_error_for_model
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
+from param_estimation import estimate_params,get_error_for_model,optimize_model
 
 import numpy as np
 from scipy.io import wavfile
@@ -20,45 +20,59 @@ ys = []
 names = []
 models = []
 
+def add_to_tests(model, name, y, ys, names, models):
+    ys.append(y)
+    names.append(name)
+    wavfile.write('audio_files/' + names[-1] + '.wav', fs, y)
+    models.append(model)
+
 # Gain
 gain = -0.2
 y1 = gain * x
-ys.append(y1)
-names.append('gain')
-wavfile.write('audio_files/' + names[-1] + '.wav', fs, y1)
 
 model1 = Model()
 model1.elements.append(Gain())
-models.append(model1)
+add_to_tests(model1, 'gain', y1, ys, names, models)
 
 # Delay / Comb filter
-delay_amt = 20 # samples
+delay_amt = 5 # samples
 mix = -0.5
 del_sig = np.zeros(np.shape(x))
 N = len(x[:,0])
 del_sig[delay_amt:,0] = x[:N-delay_amt,0]
 del_sig[delay_amt:,1] = x[:N-delay_amt,1]
 y2 = 0.5 * (x + del_sig * mix)
-ys.append(y2)
-names.append('delay')
-wavfile.write('audio_files/' + names[-1] + '.wav', fs, y2)
 
 model2 = Model()
-model2.elements.append(Split([[], [Delay(), Gain()]]))
-model2.elements.append(Gain())
-models.append(model2)
+model2.elements.append(Split([[], [UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), Gain(0.9)]]))
+model2.elements.append(Gain(-0.1))
+add_to_tests(model2, 'delay', y2, ys, names, models)
 
+# Lowpass Filter
+b, a = adsp.design_LPF2(1000, 0.7071, fs)
+y3 = np.zeros(np.shape(x))
+y3[:,0] = signal.lfilter(b, a, x[:,0])
+y3[:,1] = signal.lfilter(b, a, x[:,1])
+
+model3 = Model()
+model3.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
+model3.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
+# add_to_tests(model3, 'filter', y3, ys, names, models)
+
+# Constants
 plugin = 'param_est'
 orig_file = 'audio_files/drums.wav'
 out_file = 'audio_files/param_est.wav'
 # Estimate all structures
 for n in range(len(models)):
     print('Estimating params for: {}'.format(names[n]))
-    params = estimate_params(models[n], plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
+    # params = estimate_params(models[n], plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
+    params = optimize_model(models[n], plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav', tol=1e-5)
     models[n].set_params(params)
+    print(params)
 
     err = get_error_for_model(params, models[n], plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
-    assert err < 5.0e-2, "Final error = {}".format(err)
+    assert err < 5e-5, "Final error = {}".format(err)
 
     print('Error: {}'.format(err))
     print('SUCCESS')

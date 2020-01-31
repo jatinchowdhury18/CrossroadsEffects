@@ -2,7 +2,7 @@ import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-from gen_faust import Model,Element,Gain,Delay,Split,Feedback
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
 from plugin_utils import compile_plugin, test_plugin, calc_error
 from param_estimation import get_error_for_model
 
@@ -28,8 +28,8 @@ wavfile.write('audio_files/drums-wet.wav', fs, y)
 
 # Create model
 model = Model()
-model.elements.append(Feedback([Split([[Gain(a[1])], [Delay(1/100), Gain(a[2])]]), Gain(-1.0)]))
-model.elements.append(Split([[Gain(b[0])], [Delay(1/100), Gain(b[1])], [Delay(2/100), Gain(b[2])]]))
+model.elements.append(Feedback([Split([[Gain(a[1])], [UnitDelay(), Gain(a[2])]]), Gain(-1.0)]))
+model.elements.append(Split([[Gain(b[0])], [UnitDelay(), Gain(b[1])], [UnitDelay(), Gain(b[2])]]))
 
 # Write to file and compile
 model.write_to_file('test_DF2.dsp')
