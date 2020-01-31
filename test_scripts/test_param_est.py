@@ -32,7 +32,7 @@ y1 = gain * x
 
 model1 = Model()
 model1.elements.append(Gain())
-add_to_tests(model1, 'gain', y1, ys, names, models)
+# add_to_tests(model1, 'gain', y1, ys, names, models)
 
 # Delay / Comb filter
 delay_amt = 5 # samples
@@ -46,18 +46,29 @@ y2 = 0.5 * (x + del_sig * mix)
 model2 = Model()
 model2.elements.append(Split([[], [UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), Gain(0.9)]]))
 model2.elements.append(Gain(-0.1))
-add_to_tests(model2, 'delay', y2, ys, names, models)
+# add_to_tests(model2, 'delay', y2, ys, names, models)
+
+# 4th-order FIR filter
+b = [0.3, -0.4, 0.12, 0.2, -0.75]
+y3 = np.zeros(np.shape(x))
+y3[:,0] = signal.lfilter(b, [1], x[:,0])
+y3[:,1] = signal.lfilter(b, [1], x[:,1])
+
+model3 = Model()
+model3.elements.append(Split([[Gain()], [UnitDelay(),Gain()], [UnitDelay(),UnitDelay(),Gain()],
+    [UnitDelay(),UnitDelay(),UnitDelay(),Gain()], [UnitDelay(),UnitDelay(),UnitDelay(),UnitDelay(),Gain()]]))
+add_to_tests(model3, 'FIR filter', y3, ys, names, models)
 
 # Lowpass Filter
 b, a = adsp.design_LPF2(1000, 0.7071, fs)
-y3 = np.zeros(np.shape(x))
-y3[:,0] = signal.lfilter(b, a, x[:,0])
-y3[:,1] = signal.lfilter(b, a, x[:,1])
+y4 = np.zeros(np.shape(x))
+y4[:,0] = signal.lfilter(b, a, x[:,0])
+y4[:,1] = signal.lfilter(b, a, x[:,1])
 
-model3 = Model()
-model3.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
-model3.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
-# add_to_tests(model3, 'filter', y3, ys, names, models)
+model4 = Model()
+model4.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
+model4.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
+# add_to_tests(model4, 'filter', y4, ys, names, models)
 
 # Constants
 plugin = 'param_est'
