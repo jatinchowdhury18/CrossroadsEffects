@@ -32,7 +32,7 @@ y1 = gain * x
 
 model1 = Model()
 model1.elements.append(Gain())
-# add_to_tests(model1, 'gain', y1, ys, names, models)
+add_to_tests(model1, 'gain', y1, ys, names, models)
 
 # Delay / Comb filter
 delay_amt = 5 # samples
@@ -46,7 +46,7 @@ y2 = 0.5 * (x + del_sig * mix)
 model2 = Model()
 model2.elements.append(Split([[], [UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), Gain(0.9)]]))
 model2.elements.append(Gain(-0.1))
-# add_to_tests(model2, 'delay', y2, ys, names, models)
+add_to_tests(model2, 'delay', y2, ys, names, models)
 
 # 4th-order FIR filter
 b = [0.3, -0.4, 0.12, 0.2, -0.75]
