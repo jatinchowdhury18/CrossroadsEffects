@@ -9,7 +9,7 @@ from scipy.optimize import minimize
 def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
     params, bounds = model.get_params()
     result = minimize(get_error_for_model, params, args=(model,name,in_wav,out_wav,des_wav), tol=tol,
-                      bounds=bounds, options={'maxiter': 30, 'eps': 1e-06, 'ftol':1e-10, 'iprint': 1})
+                      bounds=bounds, options={'maxiter': 30, 'eps': 1e-06, 'ftol': 1e-11, 'iprint': 1})
     return result.x
 
 def estimate_params(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
