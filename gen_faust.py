@@ -90,7 +90,7 @@ class UnitDelay(Element):
         return '{} = @(1);\n'.format(self.name)
 
     def get_params(self, params, bounds):
-        return
+        pass
 
     def set_params(self, params, idx):
         return idx
