@@ -43,7 +43,7 @@ out_file = 'audio_files/evolve_struct.wav'
 
 # Attempt to evolve all structures
 for n in range(len(names)):
-    print('Estimating params for: {}'.format(names[n]))
+    print('Evolving structure for: {}'.format(names[n]))
 
     model = get_evolved_structure(plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
     params,_ = model.get_params()

@@ -27,9 +27,10 @@ y[:,1] = signal.lfilter(b, a, x[:,1])
 wavfile.write('audio_files/drums-wet.wav', fs, y)
 
 # Create model
-model = Model()
+model = Model('DF2_Test')
 model.elements.append(Feedback([Split([[Gain(a[1])], [UnitDelay(), Gain(a[2])]]), Gain(-1.0)]))
-model.elements.append(Split([[Gain(b[0])], [UnitDelay(), Gain(b[1])], [UnitDelay(), Gain(b[2])]]))
+model.elements.append(Split([[Gain(b[0])], [UnitDelay(), Gain(b[1])], [UnitDelay(), UnitDelay(), Gain(b[2])]]))
+print(model)
 
 # Write to file and compile
 model.write_to_file('test_DF2.dsp')
