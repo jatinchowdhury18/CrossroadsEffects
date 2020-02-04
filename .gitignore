@@ -4,6 +4,8 @@ faust2w64vst
 faust.*
 
 *.dll
+*.so
+*.vst
 
 .vscode
 __pycache__

@@ -59,16 +59,26 @@ model3.elements.append(Split([[Gain()], [UnitDelay(),Gain()], [UnitDelay(),UnitD
     [UnitDelay(),UnitDelay(),UnitDelay(),Gain()], [UnitDelay(),UnitDelay(),UnitDelay(),UnitDelay(),Gain()]]))
 add_to_tests(model3, 'FIR filter', y3, ys, names, models)
 
-# Lowpass Filter
-b, a = adsp.design_LPF2(1000, 0.7071, fs)
+# One-pole filter
+fb_gain = -0.2
 y4 = np.zeros(np.shape(x))
-y4[:,0] = signal.lfilter(b, a, x[:,0])
-y4[:,1] = signal.lfilter(b, a, x[:,1])
+y4[:,0] = signal.lfilter([1], [1, -fb_gain], x[:,0])
+y4[:,1] = signal.lfilter([1], [1, -fb_gain], x[:,1])
 
 model4 = Model()
-model4.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
-model4.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
-# add_to_tests(model4, 'filter', y4, ys, names, models)
+model4.elements.append(Feedback([Gain()]))
+add_to_tests(model4, 'One-pole', y4, ys, names, models)
+
+# Lowpass Filter
+b, a = adsp.design_LPF2(1000, 0.7071, fs)
+y5 = np.zeros(np.shape(x))
+y5[:,0] = signal.lfilter(b, a, x[:,0])
+y5[:,1] = signal.lfilter(b, a, x[:,1])
+
+model5 = Model()
+model5.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
+model5.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
+# add_to_tests(model5, 'LPF', y5, ys, names, models)
 
 # Constants
 plugin = 'param_est'
@@ -86,4 +96,5 @@ for n in range(len(models)):
     assert err < 5e-5, "Final error = {}".format(err)
 
     print('Error: {}'.format(err))
-    print('SUCCESS')
+
+print('SUCCESS')
