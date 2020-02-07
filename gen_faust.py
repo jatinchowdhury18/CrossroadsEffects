@@ -2,10 +2,8 @@
 from abc import ABC, abstractmethod
 from plugin_utils import compile_plugin, test_plugin
 import uuid
-import random as r
 import numpy as np
 import matplotlib.pyplot as plt
-r.seed()
 
 # %%
 def get_uuid():
@@ -89,9 +87,11 @@ class Model:
             if isinstance(e, Split):
                 for chain in e.elements:
                     trim_elements(chain)
+                e.update_faust()
 
             elif isinstance(e, Feedback):
                 trim_elements(e.elements)
+                e.update_faust()
 
     def get_params(self):
         """Returns an array of parameters"""
@@ -179,9 +179,11 @@ class Split(Element):
         id = get_uuid()
         self.name = 'split_' + id
         self.elements = elements
+        self.update_faust()        
 
+    def update_faust(self):
         self.faust = '_ <: '
-        for chain in elements:
+        for chain in self.elements:
             if len(chain) == 0:
                 self.faust += '_'
             else:
@@ -251,13 +253,15 @@ class Feedback(Element):
         id = get_uuid()
         self.name = 'fb_' + id
         self.elements = elements
+        self.update_faust()
 
+    def update_faust(self):
         self.faust = '+~'
-        if len(elements) == 0:
+        if len(self.elements) == 0:
             self.faust += '(_*0)'
         else:
             self.faust += '('
-            for e in elements:
+            for e in self.elements:
                 self.faust += e.name + ' : '
             self.faust = self.faust[:-3]
             self.faust += ')'
@@ -317,53 +321,6 @@ class Feedback(Element):
 # # IIR example
 # model.elements.append(Feedback([Gain(0.5), Delay()]))
 # print(model)
-
-# %%
-def get_element(arg, split_recursion=0, fb_recursion=0):
-    if (split_recursion > 3): # and (arg == 2):
-        arg = 0
-    
-    if (fb_recursion > 3): # and (arg == 3):
-        arg = 0
-
-    if arg == 0: # gain
-        return Gain(r.uniform(-1.0, 1.0))
-
-    elif arg == 1: # delay
-        return Delay()
-
-    elif arg == 2: # split
-        spr = split_recursion + 1
-        num_chains = r.randint(1, 5)
-        elements = []
-        for _ in range(num_chains):
-            chain = []
-            num_elements = r.randint(0, 5)
-            for _ in range(num_elements):
-                chain.append(get_element(r.randint(0, 3), split_recursion=spr, fb_recursion=fb_recursion))
-            elements.append(chain)
-        return Split(elements)
-
-    elif arg == 3: # feedback
-        elements = []
-        num_elements = r.randint(0, 5)
-        fbr = fb_recursion + 1
-        for _ in range(num_elements):
-            elements.append(get_element(r.randint(0, 3), split_recursion=split_recursion, fb_recursion=fbr))
-        return Feedback(elements)
-
-
-def gen_random_model():
-    model = Model()
-    num_elements = r.randint(1, 4)
-
-    for _ in range(num_elements):
-        model.elements.append(get_element(r.randint(0, 3)))
-    
-    return model
-
-# model = gen_random_model()
-# model.write_to_file('test_gen.dsp')
 
 #%%
 # compile_plugin('test_gen')

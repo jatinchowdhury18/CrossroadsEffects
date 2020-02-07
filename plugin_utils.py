@@ -25,7 +25,7 @@ def get_platform_specific_args():
     return vst_script, vst_ext, runner, pipe
 
 #%%
-def compile_plugin(plugin):
+def compile_plugin(plugin, check_success=False):
     vst_script, vst_ext, _, pipe = get_platform_specific_args()
 
     faust_file = 'faust_scripts/' + plugin + '.dsp'
@@ -39,9 +39,12 @@ def compile_plugin(plugin):
     os.system('rm -rf faust_plugins/' + plugin)
     os.mkdir('faust_plugins/' + plugin)
 
-    os.system('mv faust_scripts/' + plugin + '-svg faust_plugins/' + plugin + '/svgs')  
+    res = os.system('mv faust_scripts/' + plugin + '-svg faust_plugins/' + plugin + '/svgs', )  
     mv_cmd = 'mv ' + orig_plugin_file + ' ' + cp_plugin_file
     os.system(mv_cmd)
+
+    if res != 0 and check_success:
+        exit(res)
 
 # compile_plugin('test')
 

@@ -44,7 +44,7 @@ del_sig[delay_amt:,1] = x[:N-delay_amt,1]
 y2 = 0.5 * (x + del_sig * mix)
 
 model2 = Model()
-model2.elements.append(Split([[], [UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), UnitDelay(), Gain(0.9)]]))
+model2.elements.append(Split([[], [Delay(5), Gain(0.9)]]))
 model2.elements.append(Gain(-0.1))
 add_to_tests(model2, 'delay', y2, ys, names, models)
 
@@ -55,8 +55,8 @@ y3[:,0] = signal.lfilter(b, [1], x[:,0])
 y3[:,1] = signal.lfilter(b, [1], x[:,1])
 
 model3 = Model()
-model3.elements.append(Split([[Gain()], [UnitDelay(),Gain()], [UnitDelay(),UnitDelay(),Gain()],
-    [UnitDelay(),UnitDelay(),UnitDelay(),Gain()], [UnitDelay(),UnitDelay(),UnitDelay(),UnitDelay(),Gain()]]))
+model3.elements.append(Split([[Gain()], [UnitDelay(),Gain()], [Delay(2),Gain()],
+    [Delay(3),Gain()], [Delay(4),Gain()]]))
 add_to_tests(model3, 'FIR filter', y3, ys, names, models)
 
 # One-pole filter

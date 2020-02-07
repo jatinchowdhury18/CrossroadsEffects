@@ -1,12 +1,11 @@
 import numpy as np
-from gen_faust import Model,Element,Gain,UnitDelay,Split
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
 from tqdm import tqdm
 import random
-import copy
 
 def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
-    N_pop = 6
+    N_pop = 10
     N_gens = 5
     N_survive = 2
 
@@ -101,17 +100,17 @@ def get_mutated_model(parent1, parent2):
 
     if strategy == 'concat_series':
         if bool(random.getrandbits(1)):
-            new_model.elements = copy.deepcopy(parent1.elements) + copy.deepcopy(parent2.elements)
+            new_model.elements = copy_elements(parent1.elements) + copy_elements(parent2.elements)
         else:
-            new_model.elements = copy.deepcopy(parent2.elements) + copy.deepcopy(parent1.elements)
+            new_model.elements = copy_elements(parent2.elements) + copy_elements(parent1.elements)
 
     elif strategy == 'concat_parallel':
-        new_model.elements.append(Split([copy.deepcopy(parent1.elements), copy.deepcopy(parent2.elements)]))
+        new_model.elements.append(Split([copy_elements(parent1.elements), copy_elements(parent2.elements)]))
 
     elif strategy == 'add_series':
         parent_to_add = random.choice([parent1, parent2])
         element_to_add = random.choice([Gain(), UnitDelay()])
-        new_model.elements = copy.deepcopy(parent_to_add.elements)
+        new_model.elements = copy_elements(parent_to_add.elements)
         new_model.elements.append(element_to_add)
 
     elif strategy == 'add_parallel':
@@ -121,9 +120,11 @@ def get_mutated_model(parent1, parent2):
         start_idx = random.randint(0, len(parent_to_add.elements))
         end_idx = random.randint(start_idx, len(parent_to_add.elements))
 
-        new_model.elements = copy.deepcopy(parent_to_add.elements[:start_idx])
-        new_model.elements.append(Split([copy.deepcopy(parent_to_add.elements[start_idx:end_idx]), [element_to_add]]))
-        new_model.elements += copy.deepcopy(parent_to_add.elements[end_idx:])
+        parent_elements = copy_elements(parent_to_add.elements)
+
+        new_model.elements = parent_elements[:start_idx]
+        new_model.elements.append(Split([parent_elements[start_idx:end_idx], [element_to_add]]))
+        new_model.elements += parent_elements[end_idx:]
 
     elif strategy == 'add_to_split':
         parent_to_add = random.choice([parent1, parent2])
@@ -134,13 +135,15 @@ def get_mutated_model(parent1, parent2):
             if isinstance(e, Split):
                 split_idxs.append(idx)
         
+        parent_elements = copy_elements(parent_to_add.elements)
+
         if split_idxs == []:
             idx = random.randint(0, len(parent_to_add.elements))
-            new_model.elements = copy.deepcopy(parent_to_add.elements[:idx])
+            new_model.elements = parent_elements[:idx]
             new_model.elements.append(Split([[], [element_to_add]]))
-            new_model.elements += copy.deepcopy(parent_to_add.elements[idx:])
+            new_model.elements += parent_elements[idx:]
         else:    
-            new_model.elements = copy.deepcopy(parent_to_add.elements)
+            new_model.elements = parent_elements
             split = new_model.elements[random.choice(split_idxs)]
             add_element_to_split (split, element_to_add)
 
@@ -152,6 +155,26 @@ def get_mutated_model(parent1, parent2):
 
     return new_model
 
+
+def copy_elements(elements):
+    new_elements = []
+    for e in elements:
+        if isinstance(e, Gain):
+            new_elements.append(Gain())
+        elif isinstance(e, UnitDelay):
+            new_elements.append(UnitDelay())
+        elif isinstance(e, Delay):
+            new_elements.append(Delay(e.length))
+        elif isinstance(e, Split):
+            chains = []
+            for chain in e.elements:
+                chains.append(copy_elements(chain))
+            new_elements.append(Split(chains))
+        elif isinstance(e, Feedback):
+            fb_elements = copy_elements(e.elements)
+            new_elements.append(Feedback(fb_elements))
+
+    return new_elements
 
 def add_element_to_split(split, element):
     chain = random.choice(split.elements)

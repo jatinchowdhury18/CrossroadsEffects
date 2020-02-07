@@ -8,6 +8,9 @@ from param_estimation import get_error_for_model
 import numpy as np
 from scipy.io import wavfile
 import audio_dspy as adsp
+import random
+
+random.seed(0x34567890)
 
 # read file
 fs, x = wavfile.read('audio_files/drums.wav')
@@ -34,7 +37,7 @@ N = len(x[:,0])
 del_sig[delay_amt:,0] = x[:N-delay_amt,0]
 del_sig[delay_amt:,1] = x[:N-delay_amt,1]
 y2 = 0.5 * (x + del_sig * mix)
-# add_to_tests('delay', y2, ys, names)
+add_to_tests('delay', y2, ys, names)
 
 # Constants
 plugin = 'evolve_struct'

@@ -1,5 +1,8 @@
 import("stdfaust.lib");
 
-gain_6b54cc4f = _*-0.20000485467822135;
+gain_05042712 = _*0.13865438718714387;
+gain_28461af3 = _*1.0194167558962126;
+split_ceb25998 = _ <: _, (gain_28461af3) :> _;
 
-process = _,_ : gain_6b54cc4f,gain_6b54cc4f : _,_;
+
+process = _,_ : gain_05042712,gain_05042712 : split_ceb25998,split_ceb25998 : _,_;
