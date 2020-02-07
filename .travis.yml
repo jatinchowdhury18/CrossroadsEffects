@@ -9,13 +9,35 @@ if: (type != push) OR (type = push AND branch = master)
 
 jobs:
   include:
-    - name: "Linux"
+    - name: "Linux (quick)"
       python: 3.6
+      env: arg=--quick
 
-    - name: "Mac"
+    - name: "Mac (quick)"
       os: osx
       osx_image: xcode11.2
       language: shell
+      env: arg=--quick
+    
+    # - name: "Linux (evolve)"
+    #   python: 3.6
+    #   env: arg=--evolve
+
+    # - name: "Mac (evolve)"
+    #   os: osx
+    #   osx_image: xcode11.2
+    #   language: shell
+    #   env: arg=--evolve
+    
+    - name: "Linux (params)"
+      python: 3.6
+      env: arg=--params
+
+    - name: "Mac (params)"
+      os: osx
+      osx_image: xcode11.2
+      language: shell
+      env: arg=--params
 
 stages:
   - name: services
@@ -42,8 +64,8 @@ install:
 
 script:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]];
-    then bash run_tests.sh;
-    else sh run_tests.sh;
+    then bash run_tests.sh $arg;
+    else sh run_tests.sh $arg;
     fi
 
 cache:

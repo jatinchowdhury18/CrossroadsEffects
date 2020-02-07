@@ -10,7 +10,7 @@ from scipy.io import wavfile
 import audio_dspy as adsp
 import random
 
-random.seed(0x34567890)
+random.seed(0x34567892)
 
 # read file
 fs, x = wavfile.read('audio_files/drums.wav')
