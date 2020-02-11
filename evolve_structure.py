@@ -1,13 +1,19 @@
 import numpy as np
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
+from plugin_utils import compile_plugin
 from tqdm import tqdm
 import random
+import os
 
 def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
-    N_pop = 10
+    N_pop = 16
     N_gens = 5
-    N_survive = 2
+    N_survive = 3
+
+    res = os.system('mkdir {}'.format(plugin))
+    if (res > 0):
+        exit(res)
 
     # create initial model parents
     models = []
@@ -20,8 +26,12 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
     model2.elements.append(UnitDelay())
     models.append(model2)
 
+    model3 = Model()
+    model3.elements.append(Split([[Gain()], [UnitDelay(), Gain()]]))
+    models.append(model3)
+
     # create initial generation
-    models = create_generation(models, N_pop)
+    models = create_generation(models, N_pop, N_survive)
 
     gen_num = 0
     converge = False
@@ -47,6 +57,12 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
         errors = errors[aridxs]
         models = [models[i] for i in aridxs]
 
+        for n in range(N_survive):
+            models[n].write_to_file(plugin + '.dsp')
+            compile_plugin(plugin)
+            os.system('cp -R faust_plugins/{} {}/gen{}_{}'.format(plugin, plugin, gen_num, n))
+            os.system('cp faust_scripts/{}.dsp {}/gen{}_{}/'.format(plugin, plugin, gen_num, n))
+
         # Take survivors
         errors = errors[:N_survive]
         models = models[:N_survive]
@@ -59,7 +75,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
             break
 
         # mutate off survivors
-        create_generation(models, N_pop)
+        create_generation(models, N_pop, N_survive)
 
         gen_num += 1
 
@@ -70,13 +86,20 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
 
     print('Best error: {}'.format(errors[0]))
 
+    models[0].write_to_file(plugin + '.dsp')
+    compile_plugin(plugin)
+    os.system('cp -R faust_plugins/{} {}/gen_final'.format(plugin, plugin))
+    os.system('cp faust_scripts/{}.dsp {}/gen_final/'.format(plugin, plugin))
+
     return models[0]
 
 
-def create_generation(models, N):
+def create_generation(models, N, N_survive):
     """create a generation of models from first two in existing list"""
     while len(models) < N:
-        models.append(get_mutated_model(models[0],models[1]))
+        parent1 = random.choice(models[:N_survive])
+        parent2 = random.choice(models[:N_survive])
+        models.append(get_mutated_model(parent1, parent2))
 
         # check for duplicates
         for m in models[:-1]:
@@ -88,7 +111,7 @@ def create_generation(models, N):
     return models
 
 
-mutation_strategies = ['concat_series', 'concat_parallel', 'add_series', 'add_parallel', 'add_to_split']
+mutation_strategies = ['concat_series', 'concat_parallel', 'add_gain', 'add_delay', 'add_split']
 
 def get_mutated_model(parent1, parent2):
     """Create a new model by mutating existing models"""
@@ -107,45 +130,20 @@ def get_mutated_model(parent1, parent2):
     elif strategy == 'concat_parallel':
         new_model.elements.append(Split([copy_elements(parent1.elements), copy_elements(parent2.elements)]))
 
-    elif strategy == 'add_series':
+    elif strategy == 'add_gain':
         parent_to_add = random.choice([parent1, parent2])
-        element_to_add = random.choice([Gain(), UnitDelay()])
         new_model.elements = copy_elements(parent_to_add.elements)
-        new_model.elements.append(element_to_add)
+        add_element(new_model, Gain())
 
-    elif strategy == 'add_parallel':
+    elif strategy == 'add_delay':
         parent_to_add = random.choice([parent1, parent2])
-        element_to_add = random.choice([Gain(), UnitDelay()])
+        new_model.elements = copy_elements(parent_to_add.elements)
+        add_element(new_model, UnitDelay())
 
-        start_idx = random.randint(0, len(parent_to_add.elements))
-        end_idx = random.randint(start_idx, len(parent_to_add.elements))
-
-        parent_elements = copy_elements(parent_to_add.elements)
-
-        new_model.elements = parent_elements[:start_idx]
-        new_model.elements.append(Split([parent_elements[start_idx:end_idx], [element_to_add]]))
-        new_model.elements += parent_elements[end_idx:]
-
-    elif strategy == 'add_to_split':
+    elif strategy == 'add_split':
         parent_to_add = random.choice([parent1, parent2])
-        element_to_add = random.choice([Gain(), UnitDelay()])
-
-        split_idxs = []
-        for idx, e in enumerate(parent_to_add.elements):
-            if isinstance(e, Split):
-                split_idxs.append(idx)
-        
-        parent_elements = copy_elements(parent_to_add.elements)
-
-        if split_idxs == []:
-            idx = random.randint(0, len(parent_to_add.elements))
-            new_model.elements = parent_elements[:idx]
-            new_model.elements.append(Split([[], [element_to_add]]))
-            new_model.elements += parent_elements[idx:]
-        else:    
-            new_model.elements = parent_elements
-            split = new_model.elements[random.choice(split_idxs)]
-            add_element_to_split (split, element_to_add)
+        new_model.elements = copy_elements(parent_to_add.elements)
+        add_element(new_model, Split([[Gain()], [UnitDelay(), Gain()]]))
 
     else:
         print('Warning: unknown mutation strategy selected')
@@ -176,17 +174,12 @@ def copy_elements(elements):
 
     return new_elements
 
-def add_element_to_split(split, element):
-    chain = random.choice(split.elements)
-
-    if chain == []:
-        chain.append(element)
-        return
-
-    chain_e = random.choice(chain)
-    if (isinstance(chain_e, Split)):
-        add_element_to_split(chain_e, element)
-        return
-
-    split_idx = random.randint(0, len(chain))
-    chain.insert(split_idx, element)
+def add_element(model, element_to_add):
+    chains = [model.elements]
+    for e in model.elements:
+        if isinstance(e, Split):
+            for chain in e.elements:
+                chains.append(chain)
+    
+    chain_to_add_to = random.choice(chains)
+    chain_to_add_to.insert(random.randint(0, len(chain_to_add_to)), element_to_add)

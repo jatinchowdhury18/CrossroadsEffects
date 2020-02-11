@@ -13,7 +13,7 @@ def test_generation(model1, model2, num=10):
     models = []
     models.append(model1)
     models.append(model2)
-    models = create_generation(models, num)
+    models = create_generation(models, num, 2)
 
     for m in models:
         print(m)

@@ -10,8 +10,6 @@ from scipy.io import wavfile
 import audio_dspy as adsp
 import random
 
-random.seed(0x34567892)
-
 # read file
 fs, x = wavfile.read('audio_files/drums.wav')
 x = adsp.normalize(x)
@@ -40,14 +38,15 @@ y2 = 0.5 * (x + del_sig * mix)
 add_to_tests('delay', y2, ys, names)
 
 # Constants
-plugin = 'evolve_struct'
 orig_file = 'audio_files/drums.wav'
 out_file = 'audio_files/evolve_struct.wav'
 
 # Attempt to evolve all structures
 for n in range(len(names)):
     print('Evolving structure for: {}'.format(names[n]))
+    random.seed(0x3456)
 
+    plugin = 'evolve_struct_' + names[n]
     model = get_evolved_structure(plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
     params,_ = model.get_params()
     err = get_error_for_model(params, model, plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
