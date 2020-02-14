@@ -1,7 +1,7 @@
 import numpy as np
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
-from plugin_utils import compile_plugin
+from plugin_utils import compile_plugin, test_plugin
 from tqdm import tqdm
 import random
 import os
@@ -88,6 +88,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
 
     models[0].write_to_file(plugin + '.dsp')
     compile_plugin(plugin)
+    test_plugin(plugin, dry_file, wet_file)
     os.system('cp -R faust_plugins/{} {}/gen_final'.format(plugin, plugin))
     os.system('cp faust_scripts/{}.dsp {}/gen_final/'.format(plugin, plugin))
 

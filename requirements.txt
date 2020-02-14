@@ -3,3 +3,4 @@ scipy
 matplotlib
 audio_dspy
 tqdm
+click

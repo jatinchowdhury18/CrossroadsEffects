@@ -1,5 +1,6 @@
 *.wav
 !drums.wav
+!gain.wav
 faust2w64vst
 faust.*
 
