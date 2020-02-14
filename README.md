@@ -64,7 +64,7 @@ To use Crossroads, you must have an input audio file, and a
 desired output audio file. Crossroads will attempt to generate
 an audio effect that can create the desired output from the given
 input. As an example, the `audio_files/` directory contains
-a drum sample (`drums.wav, and the same sample with a lower
+a drum sample (`drums.wav`), and the same sample with a lower
 volume (`gain.wav`).
 
 ```bash
