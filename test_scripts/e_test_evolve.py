@@ -7,6 +7,7 @@ from param_estimation import get_error_for_model
 
 import numpy as np
 from scipy.io import wavfile
+import scipy.signal as signal
 import audio_dspy as adsp
 import random
 
@@ -36,6 +37,23 @@ del_sig[delay_amt:,0] = x[:N-delay_amt,0]
 del_sig[delay_amt:,1] = x[:N-delay_amt,1]
 y2 = 0.5 * (x + del_sig * mix)
 add_to_tests('delay', y2, ys, names)
+
+# Delay / Comb filter
+delay_amt = 5 # samples
+mix = -0.5
+del_sig = np.zeros(np.shape(x))
+N = len(x[:,0])
+del_sig[delay_amt:,0] = x[:N-delay_amt,0]
+del_sig[delay_amt:,1] = x[:N-delay_amt,1]
+y2 = 0.5 * (x + del_sig * mix)
+add_to_tests('delay', y2, ys, names)
+
+# 4th-order FIR filter
+b = [0.3, -0.4, 0.12, 0.2, -0.75]
+y3 = np.zeros(np.shape(x))
+y3[:,0] = signal.lfilter(b, [1], x[:,0])
+y3[:,1] = signal.lfilter(b, [1], x[:,1])
+add_to_tests('FIR_filter', y3, ys, names)
 
 # Constants
 orig_file = 'audio_files/drums.wav'

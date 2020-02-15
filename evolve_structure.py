@@ -146,6 +146,23 @@ def get_mutated_model(parent1, parent2):
         new_model.elements = copy_elements(parent_to_add.elements)
         add_element(new_model, Split([[Gain()], [UnitDelay(), Gain()]]))
 
+    elif strategy == 'add_chain':
+        parent_to_add = random.choice([parent1, parent2])
+        new_model.elements = copy_elements(parent_to_add.elements)
+
+        split_idxs = []
+        for i, e in enumerate(new_model.elements):
+            if isinstance(e, Split):
+                split_idxs.append(i)
+        
+        if split_idxs == []:
+            print('No Splits to add to! Mutating again...')
+            return get_mutated_model(parent1, parent2)
+
+        split_idx = random.choice(split_idxs)
+        new_model.elements[split_idx].elements.append([UnitDelay(), Gain()])
+
+
     else:
         print('Warning: unknown mutation strategy selected')
         new_model.elements.append(UnitDelay())    
