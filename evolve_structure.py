@@ -1,5 +1,5 @@
 import numpy as np
-from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
 from plugin_utils import compile_plugin, test_plugin
 from tqdm import tqdm
@@ -112,7 +112,7 @@ def create_generation(models, N, N_survive):
     return models
 
 
-mutation_strategies = ['concat_series', 'concat_parallel', 'add_gain', 'add_delay', 'add_split']
+mutation_strategies = ['concat_series', 'concat_parallel', 'add_gain', 'add_delay', 'add_nl', 'add_split', 'add_chain']
 
 def get_mutated_model(parent1, parent2):
     """Create a new model by mutating existing models"""
@@ -140,6 +140,11 @@ def get_mutated_model(parent1, parent2):
         parent_to_add = random.choice([parent1, parent2])
         new_model.elements = copy_elements(parent_to_add.elements)
         add_element(new_model, UnitDelay())
+
+    elif strategy == 'add_nl':
+        parent_to_add = random.choice([parent1, parent2])
+        new_model.elements = copy_elements(parent_to_add.elements)
+        add_element(new_model, CubicNL())
 
     elif strategy == 'add_split':
         parent_to_add = random.choice([parent1, parent2])

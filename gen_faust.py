@@ -174,6 +174,20 @@ class Delay(Element):
     def get_faust(self):
         return '{} = @({});\n'.format(self.name, int(self.length))
 
+class CubicNL(Element):
+    def __init__(self):
+        id = get_uuid()
+        self.name = 'cubic_' + id
+
+    def __str__(self):
+        return 'CubicNL'
+
+    def __eq__(self):
+        return False
+
+    def get_faust(self):
+        return '{} = min(1) : max(-1) : cubic with{ cubic(x) = x - x*x*x/3; };\n'.format(self.name)
+
 class Split(Element):
     def __init__(self, elements):
         id = get_uuid()
