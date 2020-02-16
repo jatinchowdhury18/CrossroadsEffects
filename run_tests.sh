@@ -17,5 +17,5 @@ fi
 for f in $pattern
 do
     echo "Running $f ..."
-    $PY $f
+    $PY $f || exit 1
 done

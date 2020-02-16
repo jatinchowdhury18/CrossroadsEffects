@@ -182,11 +182,11 @@ class CubicNL(Element):
     def __str__(self):
         return 'CubicNL'
 
-    def __eq__(self):
-        return False
+    def __eq__(self, other):
+        return True
 
     def get_faust(self):
-        return '{} = min(1) : max(-1) : cubic with{ cubic(x) = x - x*x*x/3; };\n'.format(self.name)
+        return '{} = min(1) : max(-1) : cubic with{{ cubic(x) = x - x*x*x/3; }};\n'.format(self.name)
 
 class Split(Element):
     def __init__(self, elements):

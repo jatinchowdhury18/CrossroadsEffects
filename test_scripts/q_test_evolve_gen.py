@@ -7,7 +7,7 @@ from evolve_structure import create_generation,get_mutated_model
 from plugin_utils import compile_plugin
 
 import random
-random.seed(0x1234)
+random.seed(0x2345)
 
 def test_generation(model1, model2, num=10):
     models = []
