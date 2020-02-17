@@ -2,7 +2,7 @@ import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback
 from plugin_utils import compile_plugin, test_plugin, calc_error
 from param_estimation import get_error_for_model
 
@@ -40,10 +40,11 @@ compile_plugin('test_DF2')
 test_plugin('test_DF2', 'audio_files/drums.wav', 'audio_files/drums_out.wav')
 
 fs, y_test = wavfile.read('audio_files/drums_out.wav')
-y_test = adsp.normalize(y_test)
+y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
+# y_test = adsp.normalize(y_test)
 
 err = calc_error(y, y_test, fs)
-assert(err < 1.0e-4)
+assert err < 1.0e-4, 'Error: {}'.format(err)
 
 print('Error: {}'.format(err))
 print('SUCCESS')

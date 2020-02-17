@@ -1,7 +1,6 @@
 import("stdfaust.lib");
 
-gain_c3c4d4e1 = _*-0.19996961967694077;
-fb_64746921 = +~(gain_c3c4d4e1);
+gain_19d99738 = _*2.000090066303114;
+cubic_3d3bf037 = min(1) : max(-1) : cubic with{ cubic(x) = x - x*x*x/3; };
 
-
-process = _,_ : fb_64746921,fb_64746921 : _,_;
+process = _,_ : gain_19d99738,gain_19d99738 : cubic_3d3bf037,cubic_3d3bf037 : _,_;

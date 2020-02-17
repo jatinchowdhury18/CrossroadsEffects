@@ -2,7 +2,7 @@ import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
-from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
 
 import numpy as np
@@ -69,16 +69,28 @@ model4 = Model()
 model4.elements.append(Feedback([Gain()]))
 add_to_tests(model4, 'One-pole', y4, ys, names, models)
 
-# Lowpass Filter
-b, a = adsp.design_LPF2(1000, 0.7071, fs)
-y5 = np.zeros(np.shape(x))
-y5[:,0] = signal.lfilter(b, a, x[:,0])
-y5[:,1] = signal.lfilter(b, a, x[:,1])
+# Soft-clip distortion
+in_gain = 2.0
+x_in = in_gain * np.copy(x)
+x_in = np.minimum(x_in, 1)
+x_in = np.maximum(x_in, -1)
+y5 = x_in - np.power(x_in, 3) / 3
 
 model5 = Model()
-model5.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
-model5.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
-# add_to_tests(model5, 'LPF', y5, ys, names, models)
+model5.elements.append(Gain())
+model5.elements.append(CubicNL())
+add_to_tests(model5, 'Soft-clip', y5, ys, names, models)
+
+# Lowpass Filter
+b, a = adsp.design_LPF2(1000, 0.7071, fs)
+y6 = np.zeros(np.shape(x))
+y6[:,0] = signal.lfilter(b, a, x[:,0])
+y6[:,1] = signal.lfilter(b, a, x[:,1])
+
+model6 = Model()
+model6.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
+model6.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
+# add_to_tests(model6, 'LPF', y6, ys, names, models)
 
 # Constants
 plugin = 'param_est'
