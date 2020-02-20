@@ -1,7 +1,5 @@
-import os,sys,inspect
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir) 
+import os,sys
+sys.path.append(os.path.abspath('crossroads_scripts'))
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
 from evolve_structure import create_generation,get_mutated_model
 from plugin_utils import compile_plugin

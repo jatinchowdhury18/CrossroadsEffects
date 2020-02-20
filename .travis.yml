@@ -19,15 +19,15 @@ jobs:
       language: shell
       env: arg=--quick
     
-    # - name: "Linux (evolve)"
-    #   python: 3.6
-    #   env: arg=--evolve
+    - name: "Linux (full)"
+      python: 3.6
+      env: arg=""
 
-    # - name: "Mac (evolve)"
-    #   os: osx
-    #   osx_image: xcode11.2
-    #   language: shell
-    #   env: arg=--evolve
+    - name: "Mac (full)"
+      os: osx
+      osx_image: xcode11.2
+      language: shell
+      env: arg=""
     
     - name: "Linux (params)"
       python: 3.6

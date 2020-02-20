@@ -14,8 +14,14 @@ elif [[ $1 == "--params" ]]; then
     pattern=test_scripts/p_test_*.py
 fi
 
-for f in $pattern
-do
-    echo "Running $f ..."
-    $PY $f || exit 1
-done
+if [ -z "$1" ]; then
+    echo "Testing Crossroads"
+    $PY crossroads.py --name=Gain audio_files/drums.wav audio_files/gain.wav
+else
+    for f in $pattern
+    do
+
+        echo "Running $f ..."
+        $PY $f || exit 1
+    done
+fi

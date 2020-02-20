@@ -15,6 +15,23 @@ def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
                       bounds=bounds, options={'maxiter': 30, 'eps': 1e-06, 'ftol': 1e-11, 'iprint': 1})
     return result.x
 
+def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
+    model.set_params(params)
+    model.write_to_file(name + '.dsp')
+    compile_plugin(name)
+
+    test_plugin(name, in_wav, out_wav)
+
+    fs, y = wavfile.read(des_wav)
+    fs, y_test = wavfile.read(out_wav)
+
+    # normalize for wav files
+    y = y / 2**15 if np.max(np.abs(y)) > 10 else y
+    y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
+
+    return calc_error(y, y_test, fs)
+
+# Old genetic algorithm code... not currently in use
 def estimate_params(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
     """Use Genetic Algorithm to estimate params"""
     N_pop = 100
@@ -94,19 +111,3 @@ def mutate_params(parent_params, bounds, gen_num, N_gens):
         new_params[i] = np.clip(np.random.normal(mean, stddev), bounds[i][0], bounds[i][1])
 
     return new_params
-
-def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
-    model.set_params(params)
-    model.write_to_file(name + '.dsp')
-    compile_plugin(name)
-
-    test_plugin(name, in_wav, out_wav)
-
-    fs, y = wavfile.read(des_wav)
-    fs, y_test = wavfile.read(out_wav)
-
-    # normalize for wav files
-    y = y / 2**15 if np.max(np.abs(y)) > 10 else y
-    y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
-
-    return calc_error(y, y_test, fs)

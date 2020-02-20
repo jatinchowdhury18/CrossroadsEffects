@@ -1,7 +1,5 @@
-import os,sys,inspect
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir) 
+import os,sys
+sys.path.append(os.path.abspath('crossroads_scripts'))
 from evolve_structure import get_evolved_structure
 from param_estimation import get_error_for_model
 
