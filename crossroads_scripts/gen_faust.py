@@ -193,7 +193,7 @@ class Split(Element):
         id = get_uuid()
         self.name = 'split_' + id
         self.elements = elements
-        self.update_faust()        
+        self.update_faust()
 
     def update_faust(self):
         self.faust = '_ <: '
@@ -261,6 +261,34 @@ class Split(Element):
             for e in chain:
                 idx = e.set_params(params, idx)
         return idx
+
+class FB2(Element):
+    def __init__(self):
+        id= get_uuid()
+        self.name = 'fb2_' + id
+
+        self.pole_mag = 0.5 # 0-1
+        self.pole_angle = 0.1 # 0-pi/2
+    
+    def get_faust(self):
+        root1 = self.pole_mag * np.exp(1j * self.pole_angle)
+        root2 = self.pole_mag * np.exp(-1j * self.pole_angle)
+        poly = np.poly((root1, root2))
+
+        string = '{} = +~(_ <: (_*{}, _*{}) : (_, @(1)) :> _);\n'.format(self.name, poly[1], poly[2])
+        return string
+
+    def get_params(self, params, bounds):
+        params.append(self.pole_mag)
+        bounds.append((0, 1))
+
+        params.append(self.pole_angle)
+        bounds.append((0, np.pi/2))
+
+    def set_params(self, params, idx):
+        self.pole_mag = params[idx]
+        self.pole_angle = params[idx+1]
+        return idx + 2
 
 class Feedback(Element):
     def __init__(self, elements):

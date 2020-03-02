@@ -1,6 +1,6 @@
 import os,sys
 sys.path.append(os.path.abspath('crossroads_scripts'))
-from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback
+from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback,FB2
 from param_estimation import estimate_params,get_error_for_model,optimize_model
 
 import numpy as np
@@ -79,16 +79,33 @@ model5.elements.append(Gain())
 model5.elements.append(CubicNL())
 add_to_tests(model5, 'Soft-clip', y5, ys, names, models)
 
-# Lowpass Filter
-b, a = adsp.design_LPF2(1000, 0.7071, fs)
+# Two-pole filter
+pole_mag = 0.3
+pole_angle = 0.2
+
+root1 = pole_mag * np.exp(1j * pole_angle)
+root2 = pole_mag * np.exp(-1j * pole_angle)
+poly = np.poly((root1, root2))
+
 y6 = np.zeros(np.shape(x))
-y6[:,0] = signal.lfilter(b, a, x[:,0])
-y6[:,1] = signal.lfilter(b, a, x[:,1])
+y6[:,0] = signal.lfilter([1], [1, -poly[1], -poly[2]], x[:,0])
+y6[:,1] = signal.lfilter([1], [1, -poly[1], -poly[2]], x[:,1])
 
 model6 = Model()
-model6.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
-model6.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
-# add_to_tests(model6, 'LPF', y6, ys, names, models)
+model6.elements.append(FB2())
+add_to_tests(model6, 'Two-pole', y6, ys, names, models)
+
+# Lowpass Filter
+b, a = adsp.design_LPF2(1000, 0.7071, fs)
+y7 = np.zeros(np.shape(x))
+y7[:,0] = signal.lfilter(b, a, x[:,0])
+y7[:,1] = signal.lfilter(b, a, x[:,1])
+
+model7 = Model()
+# model7.elements.append(Feedback([Split([[Gain()], [UnitDelay(), Gain()]])]))
+model7.elements.append(FB2())
+model7.elements.append(Split([[Gain()], [UnitDelay(), Gain()], [UnitDelay(), UnitDelay(), Gain()]]))
+# add_to_tests(model7, 'LPF', y7, ys, names, models)
 
 # Constants
 plugin = 'param_est'
