@@ -5,7 +5,7 @@ language: python
 
 # if pull request: always build
 # if push: only build for master branch
-if: (type != push) OR (type = push AND branch = master)
+if: (type != push) OR (type = push AND branch = faster)
 
 jobs:
   include:
@@ -49,6 +49,7 @@ addons:
       - cmake
       - webkit2gtk-4.0
       - libboost-all-dev
+      - libsndfile
 
 services:
   - xvfb

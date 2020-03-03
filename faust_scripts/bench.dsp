@@ -1,10 +1,11 @@
 import("stdfaust.lib");
 
-gain_245d0569 = _*1.0;
-gain_9ddb8d34 = _*1.0;
-gain_c6de63ef = _*1.0;
-gain_644c5c76 = _*1.0;
-split_14540055 = _ <: (gain_245d0569 : gain_9ddb8d34), (gain_c6de63ef), (gain_644c5c76) :> _;
+gain_91797324 = _*1.0;
+gain_468d866a = _*1.0;
+unit_delay_c988eb83 = @(1);
+gain_c3e00ad4 = _*1.0;
+gain_469be2d7 = _*0.2;
+split_be6e3e92 = _ <: (gain_91797324 : gain_468d866a), (unit_delay_c988eb83 : gain_c3e00ad4), (gain_469be2d7) :> _;
 
 
-process = _,_ : split_14540055,split_14540055 : _,_;
+process = _,_ : split_be6e3e92,split_be6e3e92 : _,_;
