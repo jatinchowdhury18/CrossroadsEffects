@@ -49,7 +49,7 @@ addons:
       - cmake
       - webkit2gtk-4.0
       - libboost-all-dev
-      - libsndfile
+      - libsndfile-dev
 
 services:
   - xvfb
