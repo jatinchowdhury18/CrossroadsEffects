@@ -53,6 +53,7 @@ addons:
   homebrew:
     packages:
       - libsndfile
+    update: true
 
 services:
   - xvfb
