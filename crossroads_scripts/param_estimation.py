@@ -3,6 +3,8 @@ from scipy.io import wavfile
 from gen_faust import Model
 from plugin_utils import compile_plugin, test_plugin, calc_error
 from tqdm import tqdm
+import os
+from sys import platform
 
 from scipy.optimize import minimize
 
@@ -16,6 +18,28 @@ def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
     return result.x
 
 def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
+    if platform == "win32": # no how to get libsndfile to work on Windows??
+        return get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav)
+
+    model.set_params(params)
+    model.write_to_file(name + '.dsp')
+
+    os.system('faust -i -a modules/faust/architecture/sndfile.cpp faust_scripts/{0}.dsp -o {0}.cpp'.format(name))
+    os.system('g++ -std=c++11 {0}.cpp -o {0} -lsndfile'.format(name))
+    os.system('./{} {} {}'.format(name, in_wav, out_wav))
+    os.system('rm {0}; rm {0}.cpp'.format(name))
+
+    fs, y = wavfile.read(des_wav)
+    fs, y_test = wavfile.read(out_wav)
+
+    # normalize for wav files
+    y = y / 2**15 if np.max(np.abs(y)) > 10 else y
+    y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
+
+    return calc_error(y, y_test, fs)
+
+
+def get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav):
     model.set_params(params)
     model.write_to_file(name + '.dsp')
     compile_plugin(name)
