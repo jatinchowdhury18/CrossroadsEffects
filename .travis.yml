@@ -50,6 +50,9 @@ addons:
       - webkit2gtk-4.0
       - libboost-all-dev
       - libsndfile-dev
+  homebrew:
+    packages:
+      - libsndfile
 
 services:
   - xvfb
