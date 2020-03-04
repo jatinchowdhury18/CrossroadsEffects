@@ -24,10 +24,10 @@ def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
     model.set_params(params)
     model.write_to_file(name + '.dsp')
 
-    os.system('faust -i -a modules/faust/architecture/sndfile.cpp faust_scripts/{0}.dsp -o {0}.cpp'.format(name))
-    os.system('g++ -std=c++11 {0}.cpp -o {0} -lsndfile'.format(name))
-    os.system('./{} {} {}'.format(name, in_wav, out_wav))
-    os.system('rm {0}; rm {0}.cpp'.format(name))
+    os.system('faust -i -a modules/faust/architecture/sndfile.cpp faust_scripts/{0}.dsp -o {0}-sndfile.cpp'.format(name))
+    os.system('g++ -std=c++11 {0}-sndfile.cpp -o {0}-sndfile -lsndfile'.format(name))
+    os.system('./{}-sndfile {} {}'.format(name, in_wav, out_wav))
+    os.system('rm {0}-sndfile; rm {0}-sndfile.cpp'.format(name))
 
     fs, y = wavfile.read(des_wav)
     fs, y_test = wavfile.read(out_wav)
