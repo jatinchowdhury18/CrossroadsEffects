@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # %%
 def get_platform_specific_args():
-    vst_script = 'myfaust2faustvst'
+    vst_script = 'crossroads_scripts/myfaust2faustvst'
     pipe = " > /dev/null 2>&1"
     if platform == "linux" or platform == "linux2": # linux
         runner = 'modules/PluginRunner/PluginRunnerLinux'
@@ -17,7 +17,7 @@ def get_platform_specific_args():
         runner = 'modules/PluginRunner/PluginRunnerMac'
         vst_ext = ".vst"
     elif platform == "win32": # windows
-        vst_script = 'faust2w64vst.sh'
+        vst_script = 'crossroads_scripts/faust2w64vst.sh'
         runner = 'modules/PluginRunner/PluginRunner.exe'
         vst_ext = ".dll"
         pipe = " > NUL"

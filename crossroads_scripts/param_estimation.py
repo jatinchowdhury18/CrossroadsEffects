@@ -5,8 +5,9 @@ from plugin_utils import compile_plugin, test_plugin, calc_error
 from tqdm import tqdm
 import os
 from sys import platform
-
 from scipy.optimize import minimize
+
+USING_LIBSNDFILE=True
 
 def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
     params, bounds = model.get_params()
@@ -18,7 +19,7 @@ def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
     return result.x
 
 def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
-    if platform == "win32": # no how to get libsndfile to work on Windows??
+    if platform == "win32" or USING_LIBSNDFILE == False:
         return get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav)
 
     model.set_params(params)
