@@ -106,8 +106,8 @@ of structures.
 
 Currently Crossroads is only configured to generate
 feedforward systems. The foundations exist to generate systems
-that contain feedback, but the parameter estimation step for
-systems with complex poles is still in progress.
+that contain feedback, but implementing the parameter estimation 
+step for systems with complex poles is still in progress.
 
 ## About the name
 
