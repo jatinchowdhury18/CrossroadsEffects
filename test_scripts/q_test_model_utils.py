@@ -1,3 +1,7 @@
+"""
+Test model utilities including equality and trimming
+"""
+
 import os,sys
 sys.path.append(os.path.abspath('crossroads_scripts'))
 from gen_faust import *

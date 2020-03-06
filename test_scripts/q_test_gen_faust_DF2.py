@@ -1,3 +1,8 @@
+"""
+Test that the system can correctly generate Faust code
+for a biquad filter and compile it to a plugin
+"""
+
 import os,sys
 sys.path.append(os.path.abspath('crossroads_scripts'))
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback

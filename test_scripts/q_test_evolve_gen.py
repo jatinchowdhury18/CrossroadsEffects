@@ -1,3 +1,7 @@
+"""
+Test the generation/mutation algorithms for structural evolution
+"""
+
 import os,sys
 sys.path.append(os.path.abspath('crossroads_scripts'))
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,Split,Feedback
@@ -8,6 +12,7 @@ import random
 random.seed(0x2345)
 
 def test_generation(model1, model2, num=10):
+    """Create a new generation from parents and test that they compile correctly"""
     models = []
     models.append(model1)
     models.append(model2)
@@ -21,6 +26,7 @@ def test_generation(model1, model2, num=10):
     return models
 
 def test_success(model1, model2, target_model, num=10, iters=5):
+    """Test if the parent models can evolve into the target model"""
     for _ in range(iters):
         models = test_generation(model1,  model2, num)
 

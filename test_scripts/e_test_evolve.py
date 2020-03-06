@@ -1,3 +1,7 @@
+"""
+Test the full evolution framework
+"""
+
 import os,sys
 sys.path.append(os.path.abspath('crossroads_scripts'))
 from evolve_structure import get_evolved_structure

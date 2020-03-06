@@ -1,3 +1,8 @@
+"""
+Classes and functions for creating high-level signal
+processing models in Python and compiling them to Faust
+"""
+
 #%%
 from abc import ABC, abstractmethod
 from plugin_utils import compile_plugin, test_plugin
@@ -7,9 +12,13 @@ import matplotlib.pyplot as plt
 
 # %%
 def get_uuid():
+    """Create a unique ID for every Faust element"""
     return uuid.uuid4().hex[:8]
 
 def trim_elements(elements):
+    """
+    Trim unneeded and unnecessary elements from model
+    """
     for idx, e in enumerate(elements):
         if idx == 0:
             continue
@@ -43,11 +52,13 @@ def trim_elements(elements):
 
 #%%
 class Model:
+    """Class that describes a high-level signal processing model"""
     def __init__(self, name=None):
         self.elements = []
         self.name = name
 
     def write_to_file(self, file):
+        """Compile this signal processing model to a Faust script"""
         file = open('faust_scripts/'+file, 'w')
         file.write('import(\"stdfaust.lib\");\n\n')
 
@@ -65,15 +76,17 @@ class Model:
         file.close()
 
     def __str__(self):
+        """Return model info"""
         string = '{}: '.format(self.name if self.name is not None else 'Model')
         for e in self.elements:
             string += e.__str__() + ', '
         return string[:-2]
 
     def __eq__(self, other):
-        if len(self.elements) != len(other.elements):
+        """Check if two models are equal"""
+        if len(self.elements) != len(other.elements): # are models the same length?
             return False
-
+        # are all elements the same?
         for i, e in enumerate(self.elements):
             if type(e) is not type(other.elements[i]):
                 return False
@@ -82,6 +95,7 @@ class Model:
         return True
 
     def trim_model(self):
+        """Trim model by removing unnecessary or unneeded elements from every chain"""
         trim_elements(self.elements)
         for e in self.elements:
             if isinstance(e, Split):
@@ -104,11 +118,13 @@ class Model:
         return params, bounds
 
     def set_params(self, params):
+        """Set parameters of the model using same format of get_params()"""
         idx = 0
         for e in self.elements:
             idx = e.set_params(params, idx)
 
 class Element(ABC):
+    """Base class for signal processing elements"""
     def __init__(self):
         pass
 
@@ -123,6 +139,7 @@ class Element(ABC):
         return idx
 
 class Gain(Element):
+    """Linear gain element"""
     def __init__(self, value=1.0):
         id = get_uuid()
         self.name = 'gain_' + id
@@ -146,6 +163,7 @@ class Gain(Element):
         return idx + 1
 
 class UnitDelay(Element):
+    """Single sample delay element"""
     def __init__(self):
         id = get_uuid()
         self.name = 'unit_delay_' + id
@@ -160,6 +178,7 @@ class UnitDelay(Element):
         return '{} = @(1);\n'.format(self.name)
 
 class Delay(Element):
+    """Multi-sample delay element"""
     def __init__(self, length=0):
         id = get_uuid()
         self.name = 'delay_' + id
@@ -175,6 +194,7 @@ class Delay(Element):
         return '{} = @({});\n'.format(self.name, int(self.length))
 
 class CubicNL(Element):
+    """Cubic soft-clipping element"""
     def __init__(self):
         id = get_uuid()
         self.name = 'cubic_' + id
@@ -189,6 +209,7 @@ class CubicNL(Element):
         return '{} = min(1) : max(-1) : cubic with{{ cubic(x) = x - x*x*x/3; }};\n'.format(self.name)
 
 class Split(Element):
+    """Element that contains a parallel chains of elements"""
     def __init__(self, elements):
         id = get_uuid()
         self.name = 'split_' + id
@@ -196,6 +217,7 @@ class Split(Element):
         self.update_faust()
 
     def update_faust(self):
+        """When chains are updated, you must call this function to update the Faust code"""
         self.faust = '_ <: '
         for chain in self.elements:
             if len(chain) == 0:
@@ -263,6 +285,7 @@ class Split(Element):
         return idx
 
 class FB2(Element):
+    """2-pole Feedback element"""
     def __init__(self):
         id= get_uuid()
         self.name = 'fb2_' + id
@@ -291,6 +314,7 @@ class FB2(Element):
         return idx + 2
 
 class Feedback(Element):
+    """1-pole feedback element"""
     def __init__(self, elements):
         id = get_uuid()
         self.name = 'fb_' + id

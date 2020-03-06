@@ -1,3 +1,7 @@
+"""
+Genetic algorithm for evolving the structure of an audio effect
+"""
+
 import numpy as np
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
@@ -7,6 +11,10 @@ import random
 import os
 
 def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
+    """
+    Evolve a structure for an audio effect that processes the dry audio
+    to sound like the desired audio
+    """
     N_pop = 16
     N_gens = 5
     N_survive = 3
@@ -57,6 +65,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
         errors = errors[aridxs]
         models = [models[i] for i in aridxs]
 
+        # save surviving faust files and plugins for later analysis
         for n in range(N_survive):
             models[n].write_to_file(plugin + '.dsp')
             compile_plugin(plugin)
@@ -86,6 +95,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
 
     print('Best error: {}'.format(errors[0]))
 
+    # Save final faust script and plugin
     models[0].write_to_file(plugin + '.dsp')
     compile_plugin(plugin)
     test_plugin(plugin, dry_file, wet_file)
@@ -117,20 +127,21 @@ mutation_strategies = ['concat_series', 'concat_parallel', 'add_gain', 'add_dela
 def get_mutated_model(parent1, parent2):
     """Create a new model by mutating existing models"""
 
-    strategy = random.choice(mutation_strategies)
+    strategy = random.choice(mutation_strategies) # choose strategy randomly (eventually maybe use weighting?)
     new_model = Model()
 
     print('Mutating with strategy: ' + strategy)
 
-    if strategy == 'concat_series':
+    if strategy == 'concat_series': # create new model with parent1 in series with parent2
         if bool(random.getrandbits(1)):
             new_model.elements = copy_elements(parent1.elements) + copy_elements(parent2.elements)
         else:
             new_model.elements = copy_elements(parent2.elements) + copy_elements(parent1.elements)
 
-    elif strategy == 'concat_parallel':
+    elif strategy == 'concat_parallel': # create new model with parent1 in parallel with parent2
         new_model.elements.append(Split([copy_elements(parent1.elements), copy_elements(parent2.elements)]))
 
+    # create new model by adding new element to random location in parent
     elif strategy == 'add_gain':
         parent_to_add = random.choice([parent1, parent2])
         new_model.elements = copy_elements(parent_to_add.elements)
@@ -151,7 +162,7 @@ def get_mutated_model(parent1, parent2):
         new_model.elements = copy_elements(parent_to_add.elements)
         add_element(new_model, Split([[Gain()], [UnitDelay(), Gain()]]))
 
-    elif strategy == 'add_chain':
+    elif strategy == 'add_chain': # add new chain to existing parallel structure in parent
         parent_to_add = random.choice([parent1, parent2])
         new_model.elements = copy_elements(parent_to_add.elements)
 
@@ -172,12 +183,13 @@ def get_mutated_model(parent1, parent2):
         print('Warning: unknown mutation strategy selected')
         new_model.elements.append(UnitDelay())    
 
-    new_model.trim_model()
+    new_model.trim_model() # trim unnecessary or repetetive elements of model
 
     return new_model
 
 
 def copy_elements(elements):
+    """Returns a deep copy of a list of elements"""
     new_elements = []
     for e in elements:
         if isinstance(e, Gain):
@@ -198,6 +210,7 @@ def copy_elements(elements):
     return new_elements
 
 def add_element(model, element_to_add):
+    """Adds an element to a randomly selected chain within the model"""
     chains = [model.elements]
     for e in model.elements:
         if isinstance(e, Split):

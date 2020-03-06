@@ -1,3 +1,7 @@
+"""
+Test the parameter estimation step for a diverse set of models
+"""
+
 import os,sys
 sys.path.append(os.path.abspath('crossroads_scripts'))
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback,FB2
