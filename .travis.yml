@@ -49,6 +49,11 @@ addons:
       - cmake
       - webkit2gtk-4.0
       - libboost-all-dev
+      - libsndfile-dev
+  homebrew:
+    packages:
+      - libsndfile
+    update: true
 
 services:
   - xvfb
