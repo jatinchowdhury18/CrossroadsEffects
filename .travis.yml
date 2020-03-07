@@ -13,31 +13,31 @@ jobs:
       python: 3.6
       env: arg=--quick
 
+    - name: "Linux (params)"
+      python: 3.6
+      env: arg=--params
+
+    - name: "Linux (full)"
+      python: 3.6
+      env: arg=""
+
     - name: "Mac (quick)"
       os: osx
       osx_image: xcode11.2
       language: shell
       env: arg=--quick
-    
-    - name: "Linux (full)"
-      python: 3.6
-      env: arg=""
-
-    - name: "Mac (full)"
-      os: osx
-      osx_image: xcode11.2
-      language: shell
-      env: arg=""
-    
-    - name: "Linux (params)"
-      python: 3.6
-      env: arg=--params
 
     - name: "Mac (params)"
       os: osx
       osx_image: xcode11.2
       language: shell
       env: arg=--params
+
+    - name: "Mac (full)"
+      os: osx
+      osx_image: xcode11.2
+      language: shell
+      env: arg=""
 
 stages:
   - name: services
