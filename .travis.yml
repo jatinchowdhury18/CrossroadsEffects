@@ -76,4 +76,3 @@ script:
 cache:
   directories:
     - $HOME/.cache/pip
-    - modules/faust
