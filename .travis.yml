@@ -73,6 +73,9 @@ script:
     else sh run_tests.sh $arg;
     fi
 
+before_cache:
+  - brew cleanup
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/Library/Caches/Homebrew
