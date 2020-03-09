@@ -46,11 +46,9 @@
 #include <map>
 #include <iostream>
 
-#include "faust/gui/console.h"
-#include "faust/gui/FUI.h"
+#include "faust/gui/UI.h"
 #include "faust/dsp/dsp.h"
-#include "faust/dsp/dsp-tools.h"
-#include "faust/misc.h"
+#include "faust/gui/meta.h"
 
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
@@ -63,6 +61,116 @@
 //#define WRITE_SAMPLE sf_writef_float
 
 using namespace std;
+
+/***DSP tools***/
+class Deinterleaver
+{
+    
+    private:
+    
+        int fNumFrames;
+        int fNumInputs;
+        int fNumOutputs;
+        
+        FAUSTFLOAT* fInput;
+        FAUSTFLOAT* fOutputs[256];
+        
+    public:
+        
+        Deinterleaver(int numFrames, int numInputs, int numOutputs)
+        {
+            fNumFrames = numFrames;
+            fNumInputs = numInputs;
+            fNumOutputs = std::max<int>(numInputs, numOutputs);
+            
+            // allocate interleaved input channel
+            fInput = new FAUSTFLOAT[fNumFrames * fNumInputs];
+            
+            // allocate separate output channels
+            for (int i = 0; i < fNumOutputs; i++) {
+                fOutputs[i] = new FAUSTFLOAT[fNumFrames];
+            }
+        }
+        
+        ~Deinterleaver()
+        {
+            // free interleaved input channel
+            delete [] fInput;
+            
+            // free separate output channels
+            for (int i = 0; i < fNumOutputs; i++) {
+                delete [] fOutputs[i];
+            }
+        }
+        
+        FAUSTFLOAT* input() { return fInput; }
+        
+        FAUSTFLOAT** outputs() { return fOutputs; }
+        
+        void deinterleave()
+        {
+            for (int s = 0; s < fNumFrames; s++) {
+                for (int c = 0; c < fNumInputs; c++) {
+                    fOutputs[c][s] = fInput[c + s * fNumInputs];
+                }
+            }
+        }
+};
+
+class Interleaver
+{
+    
+    private:
+        
+        int fNumFrames;
+        int fNumInputs;
+        int fNumOutputs;
+    
+        FAUSTFLOAT* fInputs[256];
+        FAUSTFLOAT* fOutput;
+        
+    public:
+        
+        Interleaver(int numFrames, int numInputs, int numOutputs)
+        {
+            fNumFrames = numFrames;
+            fNumInputs 	= std::max(numInputs, numOutputs);
+            fNumOutputs = numOutputs;
+            
+            // allocate separate input channels
+            for (int i = 0; i < fNumInputs; i++) {
+                fInputs[i] = new FAUSTFLOAT[fNumFrames];
+            }
+            
+            // allocate interleaved output channel
+            fOutput = new FAUSTFLOAT[fNumFrames * fNumOutputs];
+        }
+        
+        ~Interleaver()
+        {
+            // free separate input channels
+            for (int i = 0; i < fNumInputs; i++) {
+                delete [] fInputs[i];
+            }
+            
+            // free interleaved output channel
+            delete [] fOutput;
+        }
+        
+        FAUSTFLOAT** inputs() { return fInputs; }
+        
+        FAUSTFLOAT* output() { return fOutput; }
+        
+        void interleave()
+        {
+            for (int s = 0; s < fNumFrames; s++) {
+                for (int c = 0; c < fNumOutputs; c++) {
+                    fOutput[c + s * fNumOutputs] = fInputs[c][s];
+                }
+            }
+        }
+};
+/***END DSP tools***/
 
 /******************************************************************************
  *******************************************************************************
@@ -107,13 +215,9 @@ mydsp DSP;
 
 int main(int argc, char* argv[])
 {
-    CMDUI* interface = new CMDUI(argc, argv, true);
-    DSP.buildUserInterface(interface);
     if (argc == 1) {
-        interface->printhelp_command(INPUT_OUTPUT_FILE);
         exit(1);
     }
-    interface->process_command(INPUT_OUTPUT_FILE);
     
     SNDFILE* in_sf;
     SNDFILE* out_sf;
@@ -123,7 +227,7 @@ int main(int argc, char* argv[])
     // open input file
     in_info.format = 0;
     in_info.channels = 0;
-    in_sf = sf_open(interface->input_file(), SFM_READ, &in_info);
+    in_sf = sf_open(argv[1], SFM_READ, &in_info);
     if (in_sf == NULL) {
         fprintf(stderr, "*** Input file not found.\n");
         sf_perror(in_sf);
@@ -134,7 +238,7 @@ int main(int argc, char* argv[])
     out_info = in_info;
     out_info.format = in_info.format;
     out_info.channels = DSP.getNumOutputs();
-    out_sf = sf_open(interface->output_file(), SFM_WRITE, &out_info);
+    out_sf = sf_open(argv[2], SFM_WRITE, &out_info);
     if (out_sf == NULL) {
         fprintf(stderr, "*** Cannot write output file.\n");
         sf_perror(out_sf);
@@ -150,7 +254,6 @@ int main(int argc, char* argv[])
 
     // init signal processor
     DSP.init(in_info.samplerate);
-    interface->process_init();
     
     // process all samples
     int nbf;

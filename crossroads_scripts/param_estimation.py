@@ -33,19 +33,21 @@ def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
     plugin, running audio through, and comparing the output audio with the desired
     """
     # fallback to vs version if libsndfile not available
-    if platform == "win32" or USING_LIBSNDFILE == False:
-        return get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav)
+    # ~0.04 seconds/iter
+    # if platform == "win32" or USING_LIBSNDFILE == False:
+        # return get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav)
 
     model.set_params(params)
     model.write_to_file(name + '.dsp')
 
-    # compile faust script toa faust2sndfile executable
-    os.system('faust -i -a crossroads_scripts/faust_mysndfile.cpp faust_scripts/{0}.dsp -o {0}-sndfile.cpp'.format(name))
-    os.system('g++ -std=c++11 {0}-sndfile.cpp -o {0}-sndfile -lsndfile'.format(name))
-    os.system('./{}-sndfile {} {}'.format(name, in_wav, out_wav))
-    os.system('rm {0}-sndfile; rm {0}-sndfile.cpp'.format(name))
+    # compile faust script to a faust2sndfile executable
+    os.system('faust -i -light -a crossroads_scripts/faust_mysndfile.cpp faust_scripts/{0}.dsp -o {0}-sndfile.cpp'.format(name))
+    os.system('g++ -std=c++11 {0}-sndfile.cpp -o {0}-sndfile -lsndfile'.format(name)) # ~0.5 seconds/iter
+    os.system('./{}-sndfile {} {}'.format(name, in_wav, out_wav)) # ~0.04 seconds/iter
+    os.system('rm {0}-sndfile; rm {0}-sndfile.cpp'.format(name)) # ~0.01 seconds/iter
 
     # read wav files
+    # ~0.02 seconds/iter
     fs, y = wavfile.read(des_wav)
     fs, y_test = wavfile.read(out_wav)
 
@@ -53,7 +55,7 @@ def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
     y = y / 2**15 if np.max(np.abs(y)) > 10 else y
     y_test = y_test / 2**15 if np.max(np.abs(y_test)) > 10 else y_test
 
-    return calc_error(y, y_test, fs)
+    return calc_error(y, y_test, fs) # ~0.06 seconds/iter
 
 
 def get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav):
