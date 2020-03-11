@@ -8,7 +8,7 @@ output audio file. More technically, the system uses a `Python`
 script to generate `Faust` code that compiles to create audio
 effects. The `Faust` code is then optimized to create an effect
 that best approximates the desired output, using a variety of
-optimiztion schemes as well as genetic algorithms.
+optimization schemes as well as genetic algorithms.
 
 ## Using
 
@@ -101,6 +101,14 @@ using a combination of time-domain and frequency-domain error
 functions. Finally, the results of the error functions are fed
 back to the genetic algorithm which generates a new generation
 of structures.
+
+For example, let's say we have an effect that we want to clone.
+Unbeknownst to us, the effect simply performs a 2-sample feed-forward
+comb filter. We can choose an input audio file, process it through the
+effect, then submit both audio files to Crossroads. Crossroads will
+then be able to evolve the cloned structure as follows:
+
+<img src=https://ccrma.stanford.edu/~jatin/comb_evolve.gif width=66%>
 
 ### Current Status and Future Work
 
