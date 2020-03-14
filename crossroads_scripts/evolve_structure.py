@@ -6,9 +6,20 @@ import numpy as np
 from gen_faust import Model,Element,Gain,UnitDelay,Delay,CubicNL,Split,Feedback
 from param_estimation import estimate_params,get_error_for_model,optimize_model
 from plugin_utils import compile_plugin, test_plugin
-from tqdm import tqdm
+import multiprocessing as mp
 import random
 import os
+
+def compute_model_fitness(model,plugin,dry_file,wet_file,des_file,tol):
+    """Performs parameter estimation and error calculation for a given model"""
+    params = optimize_model(model,plugin,dry_file,wet_file,des_file, tol=tol)
+    model.set_params(params)
+    error = get_error_for_model(params,model,plugin,dry_file,wet_file,des_file)   
+
+    # clean up residual files
+    os.system('rm ' + wet_file)
+    os.system(f'rm faust_scripts/{plugin}.dsp')
+    return error
 
 def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
     """
@@ -49,16 +60,10 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
         for n in range(N_pop):
             print(models[n])
 
-        errors = np.zeros(N_pop)
-        for n in tqdm(range(N_pop)):
-            print(models[n])
-            params = optimize_model(models[n],plugin,dry_file,wet_file,des_file, tol=tol)
-            models[n].set_params(params)
-            errors[n] = get_error_for_model(params,models[n],plugin,dry_file,wet_file,des_file)
-
-            # if errors[n] < tol / 2: # really fast convergence
-            #     print('Converged!')
-            #     return models[n]
+        pool = mp.Pool(mp.cpu_count())
+        errors = np.asarray(pool.starmap(compute_model_fitness, [(models[n],plugin+f'_{n}',
+            dry_file,wet_file[:-4]+f'_{n}'+wet_file[-4:],des_file,tol) for n in range(N_pop)]))
+        pool.close()
 
         # sort
         aridxs = np.argsort(errors)
