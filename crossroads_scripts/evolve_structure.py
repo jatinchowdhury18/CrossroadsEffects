@@ -9,6 +9,7 @@ from plugin_utils import compile_plugin, test_plugin
 import multiprocessing as mp
 import random
 import os
+import time
 
 def compute_model_fitness(model,plugin,dry_file,wet_file,des_file,tol):
     """Performs parameter estimation and error calculation for a given model"""
@@ -19,15 +20,15 @@ def compute_model_fitness(model,plugin,dry_file,wet_file,des_file,tol):
     # clean up residual files
     os.system('rm ' + wet_file)
     os.system(f'rm faust_scripts/{plugin}.dsp')
-    return error
+    return error, model
 
 def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
     """
     Evolve a structure for an audio effect that processes the dry audio
     to sound like the desired audio
     """
-    N_pop = 16
-    N_gens = 5
+    N_pop = 4
+    N_gens = 10
     N_survive = 3
 
     res = os.system('mkdir {}'.format(plugin))
@@ -54,6 +55,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
 
     gen_num = 0
     converge = False
+    elapsed = time.time()
     while gen_num < N_gens:
         # test current generation
         print('Testing generation: {}'.format(gen_num))
@@ -61,14 +63,35 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
             print(models[n])
 
         pool = mp.Pool(mp.cpu_count())
-        errors = np.asarray(pool.starmap(compute_model_fitness, [(models[n],plugin+f'_{n}',
-            dry_file,wet_file[:-4]+f'_{n}'+wet_file[-4:],des_file,tol) for n in range(N_pop)]))
+        results = pool.starmap(compute_model_fitness, [(models[n],plugin+f'_{n}',
+            dry_file,wet_file[:-4]+f'_{n}'+wet_file[-4:],des_file,tol) for n in range(N_pop)])
         pool.close()
+        
+        errors = np.zeros(N_pop)
+        models = []
+        for n in range(N_pop):
+            errors[n] = results[n][0]
+            models.append(results[n][1])
 
         # sort
         aridxs = np.argsort(errors)
         errors = errors[aridxs]
         models = [models[i] for i in aridxs]
+
+        # reorganize to prefer smaller structures
+        n_perfect = 0
+        for n in range(N_survive):
+            if errors[n] < 5.0e-07: n_perfect += 1
+        
+        if n_perfect > 1:
+            n_params = []
+            for n in range(n_perfect):
+                params,_ = models[n].get_params()
+                n_params.append(len(params))
+            
+            aridxs = np.argsort(n_params)
+            errors[:n_perfect] = errors[:n_perfect][aridxs]
+            models[:n_perfect] = [models[:n_perfect][i] for i in aridxs]
 
         # save surviving faust files and plugins for later analysis
         for n in range(N_survive):
@@ -89,6 +112,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
             break
 
         # mutate off survivors
+        N_pop += 4
         create_generation(models, N_pop, N_survive)
 
         gen_num += 1
@@ -99,6 +123,7 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
         print('Not Converged')
 
     print('Best error: {}'.format(errors[0]))
+    print('Time elapsed: {}'.format(time.time() - elapsed))
 
     # Save final faust script and plugin
     models[0].write_to_file(plugin + '.dsp')

@@ -24,7 +24,7 @@ def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
         return params
 
     result = minimize(get_error_for_model, params, args=(model,name,in_wav,out_wav,des_wav), tol=tol,
-                      bounds=bounds, options={'maxiter': 30, 'eps': 1e-06, 'ftol': 1e-11, 'iprint': 1})
+                      bounds=bounds, options={'maxiter': 40, 'eps': 1e-06, 'ftol': 1e-11, 'iprint': 1})
     return result.x
 
 def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
@@ -32,10 +32,9 @@ def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
     Calculate error for a model and parameters, by compiling to a faust2sndfile executable
     plugin, running audio through, and comparing the output audio with the desired
     """
-    # fallback to vs version if libsndfile not available
-    # ~0.04 seconds/iter
-    # if platform == "win32" or USING_LIBSNDFILE == False:
-        # return get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav)
+    # fallback to VST version if libsndfile not available
+    if platform == "win32" or USING_LIBSNDFILE == False:
+        return get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav)
 
     model.set_params(params)
     model.write_to_file(name + '.dsp')

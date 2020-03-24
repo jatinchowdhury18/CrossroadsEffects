@@ -55,6 +55,24 @@ x_in = np.maximum(x_in, -1)
 y4 = x_in - np.power(x_in, 3) / 3
 add_to_tests('Soft-clip', y4, ys, names)
 
+# Weiner-Hammerstein (Currently doesn't work)
+b1 = [0.3, -0.4]
+x_weiner = np.zeros_like(x)
+x_weiner[:,0] = signal.lfilter(b1, [1], x[:,0])
+x_weiner[:,1] = signal.lfilter(b1, [1], x[:,1])
+
+in_gain = 2.0
+x_nl = in_gain * np.copy(x_weiner)
+x_nl = np.minimum(x_in, 1)
+x_nl = np.maximum(x_in, -1)
+x_hammer = x_in - np.power(x_in, 3) / 3
+
+b2 = [0.2, -0.75]
+y5 = np.zeros_like(x)
+y5[:,0] = signal.lfilter(b1, [1], x_hammer[:,0])
+y5[:,1] = signal.lfilter(b1, [1], x_hammer[:,1])
+# add_to_tests('Weiner-Hammerstein', y5, ys, names)
+
 # Constants
 orig_file = 'audio_files/drums.wav'
 out_file = 'audio_files/evolve_struct.wav'
@@ -66,6 +84,7 @@ for n in range(len(names)):
 
     plugin = 'evolve_struct_' + names[n]
     model = get_evolved_structure(plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
+    print(model)
     params,_ = model.get_params()
     err = get_error_for_model(params, model, plugin, orig_file, out_file, 'audio_files/' + names[n] + '.wav')
     assert err < 5e-5, "Final error = {}".format(err)
