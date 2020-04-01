@@ -1,0 +1,34 @@
+Effects:
+    ts: Ibanez Tube Scremaer
+    ds: Boss DS-1
+    bm: Electro-Harmonix Big Muff
+
+---
+
+Bass1
+	user:    Robinhood76
+	name: 	 bass loop 120 bpm rock eights a1.wav
+	id:	 189942
+	url: 	 https://freesound.org/s/189942/
+	license: Attribution
+
+Bass2
+	user:	 UncleSigmund
+	name:	 electric_bassline.wav
+	id:	 30432
+	url: 	 https://freesound.org/s/30432/
+	license: Creative Commons 0
+
+Guitar1
+	user:	 craqs
+	name:	 cl_funky_b1.wav
+	id:	 78423
+	url: 	 https://freesound.org/s/78423/
+	license: Creative Commons 0
+
+Guitar2
+	user:	 kaponja
+	name:	 guitar jazz 5.wav
+	id:	 54238
+	url:	 https://freesound.org/s/54238/
+	license: Attribution

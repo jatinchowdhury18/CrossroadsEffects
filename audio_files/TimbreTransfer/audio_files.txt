@@ -1,0 +1,11 @@
+Examples:
+     1 - arpeggio
+     2 - chords
+     3 - melody-ish
+
+
+Synths: (Ableton 9)
+    Piano: Simpler -> Grand Piano
+    Guitar: Tension -> Clean1 Basic Guitar
+    Synth1: Analog -> Pulse Mod Reso
+    Synth2: Operator -> VS Magic

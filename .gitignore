@@ -1,17 +1,24 @@
+# Audio files
 *.wav
 !drums.wav
 !gain.wav
+!audio_files/VirtualAnalog/**/*.wav
+
+# Extra Faust things
 faust2w64vst
 faust.*
 
+# VSTs
 *.dll
 *.so
 *.vst
 
+# Residuals
 .vscode
 __pycache__
 *.pyc
 *.svg
 
+# Literature
 Papers
 Refs
