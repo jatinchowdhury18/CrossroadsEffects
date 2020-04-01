@@ -3,6 +3,7 @@
 !drums.wav
 !gain.wav
 !audio_files/VirtualAnalog/**/*.wav
+!audio_files/TimbreTransfer/**/*.wav
 
 # Extra Faust things
 faust2w64vst
