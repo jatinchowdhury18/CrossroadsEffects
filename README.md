@@ -70,7 +70,7 @@ volume (`gain.wav`).
 
 ```bash
 # Run `python crossroads.py --name=<EffectName> <input file> <desired output file>`
-# (this will take a couple hours)
+# (this could take several hours)
 python crossroads.py --name=MyGain audio_files/drums.wav audio_files/gain.wav
 ```
 Crossroads will generate a folder called `MyGain` that contains
@@ -127,7 +127,7 @@ of all time, in exchange for his soul. In audio programming,
 signal processing engineers are making a deal with the devil to
 give up creating their own DSP algorithms in exchange for machine
 learning algorithms that accomplish these signal processing tasks
-for them. In each case, the deal with the devil always takes place
+for them. In each instance, the deal with the devil takes place
 at a crossroads . . .
 
 ## Contributing
