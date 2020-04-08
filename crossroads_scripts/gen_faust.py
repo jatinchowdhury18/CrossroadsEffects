@@ -291,14 +291,14 @@ class FB2(Element):
         self.name = 'fb2_' + id
 
         self.pole_mag = 0.5 # 0-1
-        self.pole_angle = 0.1 # 0-pi/2
+        self.pole_angle = 0.5 # 0-1
     
     def get_faust(self):
-        root1 = self.pole_mag * np.exp(1j * self.pole_angle)
+        root1 = self.pole_mag * np.exp(+1j * self.pole_angle)
         root2 = self.pole_mag * np.exp(-1j * self.pole_angle)
         poly = np.poly((root1, root2))
 
-        string = '{} = +~(_ <: (_*{}, _*{}) : (_, @(1)) :> _);\n'.format(self.name, poly[1], poly[2])
+        string = '{} = +~(_ <: (_*{}, _*{}) : (_, @(1)) :> _);\n'.format(self.name, -poly[1], -poly[2])
         return string
 
     def get_params(self, params, bounds):
@@ -306,7 +306,7 @@ class FB2(Element):
         bounds.append((0, 1))
 
         params.append(self.pole_angle)
-        bounds.append((0, np.pi/2))
+        bounds.append((0, 1))
 
     def set_params(self, params, idx):
         self.pole_mag = params[idx]

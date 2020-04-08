@@ -25,6 +25,7 @@ def optimize_model(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
 
     result = minimize(get_error_for_model, params, args=(model,name,in_wav,out_wav,des_wav), tol=tol,
                       bounds=bounds, options={'maxiter': 40, 'eps': 1e-06, 'ftol': 1e-11, 'iprint': 1})
+
     return result.x
 
 def get_error_for_model(params, model, name, in_wav, out_wav, des_wav):
@@ -78,6 +79,67 @@ def get_error_for_model_vst(params, model, name, in_wav, out_wav, des_wav):
 
     return calc_error(y, y_test, fs)
 
+# Fallbak GA for feedback parameters
+def estimate_params_GA(model, name, in_wav, out_wav, des_wav, tol=1.0e-5):
+    N_pop = 500
+    N_gens = 30
+    N_survive = 2
+
+    params, bounds = model.get_params()
+    error = get_error_for_model(params, model, name, in_wav, out_wav, des_wav)
+    generation = create_generation(params, bounds, error, N_pop)
+
+    gen_num = 0
+    converged = False
+    while gen_num < N_gens:
+        print(f'Testing generation: {gen_num}')
+        errors = np.zeros(N_pop)
+        for n in tqdm(range(N_pop)):
+            errors[n] = get_error_for_model(generation[n], model, name, in_wav, out_wav, des_wav)
+
+        # sort
+        aridxs = np.argsort(errors)
+        errors = errors[aridxs]
+        generation = [generation[i] for i in aridxs]
+
+        # Take N_survive best
+        errors = errors[:N_survive]
+        generation = generation[:N_survive]
+
+        print('Surviving errors: {}'.format(errors[:N_survive]))
+        print('Surviving params: {}'.format(generation[:N_survive]))
+
+        # check for correct answer
+        if errors[0] <= tol:
+            converged = True
+            break
+
+        # mutate off survivors
+        generation = create_generation(generation[0], bounds, errors[0], N_pop, generation)
+        gen_num += 1
+
+    if converged:
+        print('Converged!')
+    else:
+        print('Not Converged')
+
+    print('Best error: {}'.format(errors[0]))
+    print('Best params: {}'.format(generation[0]))
+
+    # return best params
+    return generation[0]
+
+def create_generation(params, bounds, error, N, generation=[]):
+    while len(generation) < N:
+        new_params = np.zeros_like(params)
+        for i in range(len(params)):
+            stddev = (bounds[i][1] - bounds[i][0]) * (error / 10)
+            mean = params[i]
+            new_params[i] = np.clip(np.random.normal(mean, stddev), bounds[i][0], bounds[i][1])
+        
+        generation.append(new_params)
+
+    return generation
 
 ####################################################
 # Old genetic algorithm code... not currently in use

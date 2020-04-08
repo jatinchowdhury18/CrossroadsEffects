@@ -112,7 +112,8 @@ def get_evolved_structure(plugin,dry_file,wet_file,des_file, tol=1e-5):
             break
 
         # mutate off survivors
-        N_pop += 4
+        if N_pop < 24:
+            N_pop += 4
         create_generation(models, N_pop, N_survive)
 
         gen_num += 1

@@ -84,16 +84,16 @@ model5.elements.append(CubicNL())
 add_to_tests(model5, 'Soft-clip', y5, ys, names, models)
 
 # Two-pole filter
-pole_mag = 0.3
-pole_angle = 0.2
+pole_mag = 0.1
+pole_angle = 0.5
 
 root1 = pole_mag * np.exp(1j * pole_angle)
 root2 = pole_mag * np.exp(-1j * pole_angle)
 poly = np.poly((root1, root2))
 
 y6 = np.zeros(np.shape(x))
-y6[:,0] = signal.lfilter([1], [1, -poly[1], -poly[2]], x[:,0])
-y6[:,1] = signal.lfilter([1], [1, -poly[1], -poly[2]], x[:,1])
+y6[:,0] = signal.lfilter([1], [1, poly[1], poly[2]], x[:,0])
+y6[:,1] = signal.lfilter([1], [1, poly[1], poly[2]], x[:,1])
 
 model6 = Model()
 model6.elements.append(FB2())
